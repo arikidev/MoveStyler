@@ -19,19 +19,19 @@ Use the keys 'G,H' to navigate through default and custom movestyles
 To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
 The project works similar to Crew Boom so you can look at the instructions there for help.
 
-How to:
-+Copy or create your own animator. BRC uses specific naming of the states in the animator to call animations. Refer to the example in the proj for reference. (I recomend copying one of the templates)
-+Import any new assets. Meshes and animations.
-+Change any animations that you want in your new animator
+## How to:
+1. Copy or create your own animator. BRC uses specific naming of the states in the animator to call animations. Refer to the example in the proj for reference. (I recomend copying one of the templates)
+2. Import any new assets. Meshes and animations.
+3. Change any animations that you want in your new animator
 
-+Create a prefab
-+Add an empty transform
-+Add a animator component and assign your new animator
-+Add one or more mesh render components. remove any collision
-+Save the prefab
-+Right Click the prefab and use MoveStyler/Create Custom Movestyle.
-+Adjust the settings in your new custom Movestyle asset
-+Click -> Build Custom MoveStyle.
+### Create a prefab
+1. Add an empty transform
+2. Add a animator component and assign your new animator
+3. Add one or more mesh render components. remove any collision
+4. Save the prefab
+5. Right Click the prefab and use MoveStyler/Create Custom Movestyle.
+6. Adjust the settings in your new custom Movestyle asset
+7. Click -> Build Custom MoveStyle.
 
 ## Installation
 
