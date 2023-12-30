@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/arikidev/MoveStyler/blob/main/CrewBoom%20Plugin/Resources/logo_background.png" />
+  
 </p>
     
 This is a repository for a BepInEx plugin to load custom movestyles for the game *Bomb Rush Cyberfunk* 
@@ -19,7 +19,8 @@ Use the keys 'G,H' to navigate through default and custom movestyles
 ### [Unity project](https://github.com/arikidev/MoveStyler/releases/download/WIP-0.1-Proj/moveStylerProj.zip)
 ### [Example Movestyle](https://github.com/arikidev/MoveStyler/releases/download/WIP_0.1_Example/MoveStyler_Ring.zip)
 
-To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin.  
+To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
+The project works similar to Crew Boomso you can look at the instructions there for help 
 
 ## Installation
 
@@ -35,7 +36,7 @@ To install BepInEx, follow these steps:
 2. Navigate to the *Online* tab
 3. Find *BepInEx Pack* by BepInEx and install it
 
-## Adding characters
+## Adding movestyles
 
 1. Navigate to your BepInEx installation for the game and open the `BepInEx/config/MoveStyler/` folder
 2. Copy your character files (.cbb and .json) into the `MoveStyler` folder
