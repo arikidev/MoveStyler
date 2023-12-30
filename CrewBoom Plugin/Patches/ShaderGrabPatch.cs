@@ -3,8 +3,9 @@ using Reptile;
 using System.Collections;
 using UnityEngine;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.CharacterLoader), "LoadMaterialForCharacter")]
     public class OutfitShaderGrab
     {
@@ -34,4 +35,5 @@ namespace CrewBoom.Patches
             yield break;
         }
     }
+    */
 }

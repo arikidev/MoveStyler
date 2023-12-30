@@ -1,14 +1,15 @@
 ﻿using BepInEx.Logging;
-using CrewBoom.Data;
-using CrewBoomMono;
+using MoveStyler.Data;
+using MoveStylerMono;
 using HarmonyLib;
 using Reptile;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.SequenceHandler), "ReplaceMaterialsOnCharactersInCutscene")]
     public class SequenceCharacterModelPatch
     {
@@ -153,4 +154,5 @@ namespace CrewBoom.Patches
             SwapOutfitSwappable(swappable);
         }
     }
+    */
 }

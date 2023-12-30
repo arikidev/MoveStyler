@@ -5,8 +5,9 @@ using UnityEngine;
 
 namespace MoveStyler.Utility
 {
-    public static class CharacterDefinitionExtensions
+    public static class moveStyleDefinitionExtensions
     {
+        /*
         public static bool HasVoices(this CharacterDefinition characterDefinition)
         {
             return characterDefinition.VoiceDie.Length > 0 ||
@@ -42,5 +43,6 @@ namespace MoveStyler.Utility
 
             return firstActiveRenderer != null;
         }
+        */
     }
 }

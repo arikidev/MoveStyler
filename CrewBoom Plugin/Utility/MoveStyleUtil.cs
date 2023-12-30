@@ -5,15 +5,16 @@ using UnityEngine;
 
 namespace MoveStyler
 {
-    public static class CharUtil
+    public static class moveStyleUtil
     {
-        public const string CHARACTER_BUNDLE = "characters";
+        public const string style_BUNDLE = "movestyles";
 
         public const string ADD_CHARACTER_METHOD = "AddCharacterFBX";
         public const string ADD_MATERIAL_METHOD = "AddCharacterMaterial";
 
         public const string MATERIAL_FORMAT = "{0}Mat{1}";
 
+        /*
         public const string SKATE_OFFSET_L = "skateOffsetL";
         public const string SKATE_OFFSET_R = "skateOffsetR";
 
@@ -47,6 +48,7 @@ namespace MoveStyler
                 }
             }
         }
+
         private static void ReparentChildren(Transform source, Transform target)
         {
             Transform[] children = source.GetComponentsInChildren<Transform>();
@@ -68,22 +70,23 @@ namespace MoveStyler
             CharacterDefinition characterDefinition = source.GetComponentInChildren<CharacterDefinition>(true);
             if (characterDefinition != null)
             {
-                //characterDefinition.SetOutfit(outfit, out firstActiveRenderer);
+                characterDefinition.SetOutfit(outfit, out firstActiveRenderer);
                 return true;
             }
 
             return false;
         }
+        */
 
-        public static int GetSavedCharacterOutfit(Characters character)
+        public static int GetSavedCharacterOutfit(MoveStyle moveStyle)
         {
             int outfit = 0;
             /*
-            if (character > Characters.MAX && CharacterDatabase.GetFirstOrConfigCharacterId(character, out Guid guid))
+            if (moveStyle > MoveStyle.MAX && moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out Guid guid))
             {
-                if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress data))
+                if (MoveStyleSaveSlots.GetMoveStyleData(guid, out CharacterProgress data))
                 {
-                    outfit = data.outfit;
+                    outfit = data.moveStyleSkin;
                 }
             }
             else

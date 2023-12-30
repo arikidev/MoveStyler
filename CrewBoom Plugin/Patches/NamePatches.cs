@@ -1,11 +1,12 @@
 ﻿using BepInEx.Logging;
-using CrewBoom.Data;
+using MoveStyler.Data;
 using HarmonyLib;
 using Reptile;
 using TMPro;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(TextMeshProGameTextLocalizer), nameof(TextMeshProGameTextLocalizer.GetCharacterName), typeof(Characters))]
     public class CharacterNamePatch
     {
@@ -73,4 +74,5 @@ namespace CrewBoom.Patches
             }
         }
     }
+    */
 }

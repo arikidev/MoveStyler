@@ -1,10 +1,15 @@
-﻿using BepInEx;
+﻿using System;
+using System.IO;
+using Reptile;
+using UnityEngine;
+using BepInEx;
 using BepInEx.Bootstrap;
 using HarmonyLib;
 
-namespace CrewBoom
+namespace MoveStyler
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    //[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin("Ariki.MoveStylers", "MoveStylers", PluginInfo.PLUGIN_VERSION)]
     [BepInDependency(CharacterAPIGuid, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
@@ -20,15 +25,36 @@ namespace CrewBoom
 
             Logger.LogMessage($"{PluginInfo.PLUGIN_GUID} v{PluginInfo.PLUGIN_VERSION} starting...");
 
-            CharacterDatabaseConfig.Initialize(Config);
+            MoveStyleDatabaseConfig.Initialize(Config);
 
-            if (CharacterDatabase.Initialize())
+            if (moveStyleDatabase.Initialize())
             {
-                Harmony harmony = new Harmony("sgiygas.crewBoom");
+                Harmony harmony = new Harmony("ariki.moveStyler");
                 harmony.PatchAll();
 
-                Logger.LogMessage($"Loaded all available characters!");
+                Logger.LogMessage($"Loaded all available movestyles!");
             }
         }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                ChangeplayerMovestyle(false);
+            }
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                ChangeplayerMovestyle(true);
+            }
+        }
+
+        private void ChangeplayerMovestyle(bool reverse = false)
+        {
+            Player localPlayer = WorldHandler.instance.GetCurrentPlayer();
+            if (localPlayer == null) { return; }
+
+            moveStyleDatabase.advancePlayerMovementStyle(localPlayer, reverse);
+        }
+
     }
 }

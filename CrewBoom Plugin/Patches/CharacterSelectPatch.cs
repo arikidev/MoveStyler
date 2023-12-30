@@ -1,4 +1,4 @@
-﻿using CrewBoom.Data;
+﻿
 using HarmonyLib;
 using Reptile;
 using System;
@@ -7,8 +7,9 @@ using TMPro;
 using UnityEngine.Playables;
 using UnityEngine;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.CharacterSelect), "PopulateListOfSelectableCharacters")]
     public class CharacterSelectPopulateListPatch
     {
@@ -34,7 +35,9 @@ namespace CrewBoom.Patches
             __instance.InvokeMethod("Shuffle", ___selectableCharacters);
         }
     }
+    */
 
+    /*
     [HarmonyPatch(typeof(Reptile.CharacterSelect), "SetPlayerToCharacter")]
     public class CharacterSelectSetPlayerPatch
     {
@@ -76,7 +79,9 @@ namespace CrewBoom.Patches
             CharUtil.TrySetCustomOutfit(visual, outfit, out _);
         }
     }
+    */
 
+    /*
     [HarmonyPatch(typeof(Reptile.CharacterSelect), "CreateCharacterSelectCharacter")]
     public class CharacterSelectCreateCharacterPatch
     {
@@ -145,4 +150,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

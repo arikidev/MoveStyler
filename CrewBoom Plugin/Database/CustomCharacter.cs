@@ -1,12 +1,12 @@
-﻿using CrewBoom.Utility;
-using CrewBoomMono;
+﻿using MoveStyler.Utility;
+using MoveStylerMono;
 using Reptile;
 using Reptile.Phone;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CrewBoom.Data
+namespace MoveStyler.Data
 {
     public class CustomCharacter
     {

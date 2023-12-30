@@ -2,8 +2,9 @@
 using Reptile;
 using System;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.StyleSwitchMenu), nameof(Reptile.StyleSwitchMenu.SkinButtonClicked))]
     public class StyleSwitchMenuPatch
     {
@@ -20,4 +21,5 @@ namespace CrewBoom.Patches
             }
         }
     }
+    */
 }

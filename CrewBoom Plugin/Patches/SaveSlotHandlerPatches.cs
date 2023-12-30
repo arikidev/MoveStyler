@@ -2,8 +2,9 @@
 
 using HarmonyLib;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.SaveSlotHandler), nameof(Reptile.SaveSlotHandler.SetCurrentSaveSlotDataBySlotId))]
     public class SaveSlotHandlerLoadPatch
     {
@@ -12,4 +13,5 @@ namespace CrewBoom.Patches
             CharacterSaveSlots.LoadSlot(saveSlotId);
         }
     }
+    */
 }

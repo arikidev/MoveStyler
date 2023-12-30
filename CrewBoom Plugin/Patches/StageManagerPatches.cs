@@ -3,8 +3,9 @@ using HarmonyLib;
 using Reptile;
 using System;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.StageManager), "GetPlayerCharacter")]
     public class SetupPatch
     {
@@ -23,4 +24,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

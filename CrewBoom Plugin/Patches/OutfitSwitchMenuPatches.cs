@@ -1,8 +1,8 @@
 ﻿
 
 using BepInEx.Logging;
-using CrewBoom.Data;
-using CrewBoomMono;
+using MoveStyler.Data;
+using MoveStylerMono;
 using HarmonyLib;
 using Reptile;
 using System.Numerics;
@@ -10,8 +10,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.OutfitSwitchMenu), nameof(Reptile.OutfitSwitchMenu.SkinButtonSelected))]
     public class OutfitSwitchSelectPatch
     {
@@ -121,4 +122,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

@@ -1,13 +1,237 @@
-﻿using BepInEx.Logging;
-using CrewBoom.Data;
-using CrewBoomAPI;
-using HarmonyLib;
+﻿using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 using Reptile;
-using System;
 using UnityEngine;
+using BepInEx;
+using BepInEx.Bootstrap;
+using BepInEx.Logging;
+using HarmonyLib;
 
-namespace CrewBoom.Patches
+using MoveStyler.Data;
+
+namespace MoveStyler.Patches
 {
+    
+    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
+    public class PlayerSetCurrentMoveStyleEquippedPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME}Player Patches");
+
+        public static bool Prefix(ref MoveStyle setMoveStyleEquipped, bool changeProp, bool changeAnim)
+        {
+            if (setMoveStyleEquipped > MoveStyle.MAX)
+            {
+                DebugLog.LogMessage("Set Movestyle Equipt is custom");
+                return true;
+            }
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Reptile.Player), "SetMoveStyle")]
+    public class PlayerSetMoveStylePatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+        public static bool Prefix(ref Player __instance, MoveStyle setMoveStyle, bool changeProp, bool changeAnim, GameObject specialSkateboard = null)
+        {
+            DebugLog.LogMessage("Patching SetMoveStyle:");
+
+            if (setMoveStyle > MoveStyle.MAX)
+            {
+                DebugLog.LogMessage("setMovestyle is custom");
+
+                CharacterVisual characterVisual = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
+
+                if (changeAnim)
+                {
+                    int curAnim = (int)__instance.GetField("curAnim").GetValue(__instance);
+
+                    characterVisual.SetMoveStyleVisualAnim(__instance, setMoveStyle, specialSkateboard);
+                    if (curAnim != 0)
+                    {
+                        int newAnim = curAnim;
+                        __instance.GetField("curAnim").SetValue(__instance, 0);
+                        //__instance.curAnim = 0; Above line to set fields
+                        __instance.PlayAnim(newAnim, false, false, -1f);
+                    }
+                }
+
+                //Set MoveStyle enum on Character
+                __instance.GetField("moveStyle").SetValue(__instance, setMoveStyle);
+
+                //Apply Visual Change to CustomMoveStyle
+                if (changeProp)
+                {
+                    DebugLog.LogMessage("Updating Visual");
+                    characterVisual.SetMoveStyleVisualProps(__instance, setMoveStyle, false);
+                }
+
+                //Set MovementStats
+                CustomMoveStyle customMoveStyle;
+                moveStyleDatabase.GetCharacter(setMoveStyle, out customMoveStyle);
+                //ToDo Set this up correctly
+                customMoveStyle.setCustomMovementStats(__instance);
+
+                return false; // Skip is Enum is Custom
+            }
+            DebugLog.LogMessage("SetMovestyle is default style");
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.InitAnimation))]
+    public class PlayerInitAnimationPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+        public static void Postfix(ref Player __instance)
+        {
+            DebugLog.LogMessage("Start Custom Init Animation");
+
+            MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
+
+            Dictionary<int, Player.AnimInfo>[] animInfoSets = (Dictionary<int, Player.AnimInfo>[])__instance.GetField("animInfosSets").GetValue(__instance);
+
+            //Resize Array to match new custom styles
+            Array.Resize(ref animInfoSets, animInfoSets.Length + moveStyleDatabase.NewCharacterCount + 1);
+            __instance.GetField("animInfosSets").SetValue(__instance, animInfoSets);
+
+            for (int id = 1; id <= moveStyleDatabase.NewCharacterCount; id++)
+            {
+
+                DebugLog.LogMessage(String.Format("Length of animInfoArray: {0}", animInfoSets.Length));
+                
+                MoveStyle moveStyle = id + MoveStyle.MAX;
+                
+                //Add new obj instance to the movestyle array
+                animInfoSets[(int)moveStyle] =  new Dictionary<int, Player.AnimInfo>();
+
+                if (animInfoSets.Length < (int)moveStyle)
+                {
+                    DebugLog.LogWarning("Anim Info2 Array Length is not long enough");
+                    return;
+                }
+
+                Guid GUID;                  moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
+                CustomMoveStyle styleObj;   moveStyleDatabase.GetCharacter(GUID, out styleObj);
+
+                //Set anim info for the current custom movestyle
+                DebugLog.LogMessage(String.Format("Setting Anim Info for style: {0}", moveStyle));
+                
+                styleObj.setAnimInfo( ref __instance);
+            }
+
+            DebugLog.LogMessage("Final Custom Anim Setup");
+
+            //Return to default movestyle
+            __instance.GetField("moveStyle").SetValue(__instance, originalStyle);
+
+            //Should have already been set
+            //this.moveStyle = moveStyle;
+            //this.animInfosSets[4] = this.animInfosSets[2];
+            //this.smoothRotation = !this.isAI;
+            //this.motor.smoothRotation = this.smoothRotation;
+        }
+    }
+
+    
+    [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")] //Reflection? idk what this does
+    public class PlayerPlayAnimPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+        public static bool Prefix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
+        {
+            return true; //Testing reEnabling normal anims
+
+            MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
+
+            // Process Custom Movestyles
+            if (equippedStyle > MoveStyle.MAX)
+            {
+                DebugLog.LogMessage(String.Format("Custom Play Anim: {0}", newAnim));
+
+                int curAnim = (int)__instance.GetField("curAnim").GetValue(__instance);
+
+                if ( /*!base.gameObject.activeSelf || */ (newAnim == curAnim && !forceOverwrite) )
+                {
+                    return false;
+                }
+
+                Animator anim = (Animator)__instance.GetField("anim").GetValue(__instance);
+
+                float normalizedTransitionDuration = 0f;
+                if (!instant)
+                {
+                    /*
+                    if (__instance.animInfos.ContainsKey(newAnim) && __instance.animInfos[newAnim].fadeFrom.ContainsKey(curAnim))
+                    {
+                        normalizedTransitionDuration = __instance.animInfos[newAnim].fadeFrom[curAnim];
+                    }
+                    else if (__instance.animInfos.ContainsKey(curAnim) && __instance.animInfos[curAnim].fadeTo.ContainsKey(newAnim))
+                    {
+                        normalizedTransitionDuration = __instance.animInfos[curAnim].fadeTo[newAnim];
+                    }
+                    */
+                }
+                if (atTime != -1f)
+                {
+                    anim.CrossFade(newAnim, normalizedTransitionDuration, -1, atTime);
+                }
+                else
+                {
+                    anim.CrossFade(newAnim, normalizedTransitionDuration);
+                }
+                
+                //Old
+                //__instance.curAnimActiveTime = 0f;
+                //__instance.firstFrameAnim = true;
+                //__instance.characterVisual.feetIK = (__instance.animInfos.ContainsKey(newAnim) && __instance.animInfos[newAnim].feetIK);
+
+                __instance.GetField("curAnimActiveTime").SetValue(__instance, 0f);
+                __instance.GetField("firstFrameAnim").SetValue(__instance, true);
+                __instance.GetField("curAnim").SetValue(__instance, newAnim);
+
+                return false;
+            }
+
+                //DebugLog.LogMessage(String.Format("newAnim : {0}", newAnim));
+
+            return true;
+        }
+    }
+    
+    
+    /*
+    [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")] //Reflection? idk what this does
+    public class PlayerUpdateAnimPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+        public static bool Prefix(ref Player __instance)
+        {
+            return true; //Testing reEnabling normal anims
+
+            MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
+
+            // Process Custom Movestyles
+            if (equippedStyle > MoveStyle.MAX)
+            {
+                //DebugLog.LogMessage("Custom Update Anim");
+                return false;
+            }
+
+            return true;
+        }
+    }
+    */
+
+    /*
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCharacter))]
     public class PlayerInitOverridePatch
     {
@@ -46,7 +270,9 @@ namespace CrewBoom.Patches
             }
         }
     }
+    */
 
+    /*
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetOutfit))]
     public class PlayerSetOutfitPatch
     {
@@ -79,6 +305,9 @@ namespace CrewBoom.Patches
             return false;
         }
     }
+    */
+
+    /*
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
     public class PlayerSetMovestyleEquipped
     {
@@ -102,7 +331,9 @@ namespace CrewBoom.Patches
             }
         }
     }
+    */
 
+    /*
     [HarmonyPatch(typeof(Reptile.Player), "SaveSelectedCharacter")]
     public class PlayerSaveCharacterPatch
     {
@@ -135,7 +366,9 @@ namespace CrewBoom.Patches
             return runOriginal;
         }
     }
+    */
 
+    /*
     [HarmonyPatch(typeof(Reptile.Player), nameof(Player.PlayVoice))]
     public class PlayerVoicePatch
     {
@@ -173,4 +406,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

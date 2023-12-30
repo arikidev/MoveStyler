@@ -1,11 +1,11 @@
 ﻿using BepInEx.Logging;
-using CrewBoom.Data;
 using HarmonyLib;
 using Reptile;
 using UnityEngine;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.CharacterConstructor), nameof(Reptile.CharacterConstructor.CreateNewCharacterVisual))]
     public class ConstructorCreateVisualPatch
     {
@@ -28,4 +28,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

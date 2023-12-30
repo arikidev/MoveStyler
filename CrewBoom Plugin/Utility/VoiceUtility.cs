@@ -1,6 +1,6 @@
 using Reptile;
 
-namespace CrewBoom
+namespace MoveStyler
 {
     public static class VoiceUtility
     {

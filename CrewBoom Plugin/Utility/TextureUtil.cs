@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using UnityEngine;
 
-namespace CrewBoom.Utility
+namespace MoveStyler.Utility
 {
     public class TextureUtil
     {

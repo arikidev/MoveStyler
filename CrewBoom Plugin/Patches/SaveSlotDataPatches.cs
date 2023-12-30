@@ -2,26 +2,34 @@
 using Reptile;
 using System;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+   /* 
     [HarmonyPatch(typeof(Reptile.SaveSlotData), nameof(Reptile.SaveSlotData.GetCharacterProgress))]
     public class SaveSlotGetProgressPatch
     {
         public static bool Prefix(Characters character, ref CharacterProgress __result)
         {
-            if (character > Characters.MAX)
+            
+
+
+            if (character != null)
             {
-                if (CharacterDatabase.GetFirstOrConfigCharacterId(character, out Guid guid))
-                {
-                    if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress data))
+                if (CharacterSaveSlots.GetCharacterData(character, out CharacterProgress data))
                     {
                         __result = data;
                     }
+                
+                
+                if (moveStyleDatabase.GetFirstOrConfigMoveStyleId(character, out Guid guid))
+                {
+                    
                 }
                 return false;
             }
-
             return true;
         }
     }
+   */
+    
 }

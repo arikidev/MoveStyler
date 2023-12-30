@@ -2,13 +2,14 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System;
-using CrewBoom.Data;
+using MoveStyler.Data;
 using UnityEngine;
 using UnityEngine.Audio;
 using BepInEx.Logging;
 
-namespace CrewBoom.Patches
+namespace MoveStyler.Patches
 {
+    /*
     [HarmonyPatch(typeof(Reptile.SfxLibrary), nameof(Reptile.SfxLibrary.Init))]
     public class InitSfxLibraryPatch
     {
@@ -139,4 +140,5 @@ namespace CrewBoom.Patches
             return true;
         }
     }
+    */
 }

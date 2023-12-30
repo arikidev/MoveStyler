@@ -1,11 +1,10 @@
 ﻿using BepInEx.Logging;
-using CrewBoom.Data;
 using Reptile;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace CrewBoom
+namespace MoveStyler
 {
     public class CharacterSaveSlots
     {
@@ -106,6 +105,7 @@ namespace CrewBoom
             string characterFilePath = CharacterFilePath(slotPath, guid);
             if (!File.Exists(characterFilePath))
             {
+                /*
                 if (CharacterDatabase.GetCharacter(guid, out CustomCharacter customCharacter))
                 {
                     progress = new()
@@ -117,6 +117,7 @@ namespace CrewBoom
                     _progressLookup.Add(guid, progress);
                     return true;
                 }
+                */
                 return false;
             }
 
