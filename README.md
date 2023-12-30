@@ -6,9 +6,6 @@ This is a repository for a BepInEx plugin to load custom movestyles for the game
 
 This is retooling of Giygas's CrewBoom and there are still numerous references to Crewboom code. Shoutout to Giygas for their work.
 
-Example:  
-![image](https://github.com/SGiygas/BrcCustomCharacters/assets/50772474/43ff8ca8-0805-4409-9547-234e26fcedda)
- 
 ## Usage
 
 Use the keys 'G,H' to navigate through default and custom movestyles
