@@ -20,7 +20,21 @@ Use the keys 'G,H' to navigate through default and custom movestyles
 ### [Example Movestyle](https://github.com/arikidev/MoveStyler/releases/download/WIP_0.1_Example/MoveStyler_Ring.zip)
 
 To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
-The project works similar to Crew Boomso you can look at the instructions there for help 
+The project works similar to Crew Boom so you can look at the instructions there for help.
+
+How to:
++Copy or create your own animator. BRC uses specific naming of the states in the animator to call animations. Refer to the example in the proj for reference. (I recomend copying one of the templates)
++Import any new assets. Meshes and animations.
++Change any animations that you want in your new animator
+
++Create a prefab
++Add an empty transform
++Add a animator component and assign your new animator
++Add one or more mesh render components. remove any collision
++Save the prefab
++Right Click the prefab and use MoveStyler/Create Custom Movestyle.
++Adjust the settings in your new custom Movestyle asset
++Click -> Build Custom MoveStyle.
 
 ## Installation
 
