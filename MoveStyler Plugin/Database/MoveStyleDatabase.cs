@@ -34,16 +34,10 @@ namespace MoveStyler
         {
             if (!Directory.Exists(ASSET_PATH))
             {
-                DebugLog.LogWarning($"Could not find character bundle directory \"{ASSET_PATH}\".\nIt was created instead.");
+                DebugLog.LogWarning($"Could not find movestyle bundle directory \"{ASSET_PATH}\".\nIt was created instead.");
                 Directory.CreateDirectory(ASSET_PATH);
                 return false;
             }
-
-            /*if (!Directory.Exists(NO_CYPHER_PATH))
-            {
-                DebugLog.LogMessage("No cypher bundle path was not found. It was created instead.");
-                Directory.CreateDirectory(NO_CYPHER_PATH);
-            }*/
 
             _moveStyleBundlePaths = new Dictionary<Guid, string>();
             _customMoveStyle = new Dictionary<Guid, CustomMoveStyle>();
@@ -107,7 +101,7 @@ namespace MoveStyler
 
                 if (bundle != null)
                 {
-                    DebugLog.LogMessage("Found Bundle");
+                    //DebugLog.LogMessage("Found Bundle");
                     GameObject[] objects = bundle.LoadAllAssets<GameObject>();
                     MoveStyleDefinition moveStyleDefinition = null;
                     foreach (GameObject obj in objects)
@@ -120,11 +114,8 @@ namespace MoveStyler
                     }
                     if (moveStyleDefinition != null)
                     {
-                        DebugLog.LogMessage("Found MovestyleDefinition");
+                        //DebugLog.LogMessage("Found MovestyleDefinition");
                         string fileName = Path.GetFileName(filePath);
-
-                        DebugLog.LogMessage($"GrindSpeed = {moveStyleDefinition.grindSpeed}");
-
                         /*
                          * Reimplement Json at somepoint
                         string potentialConfigPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + ".json");
@@ -174,16 +165,16 @@ namespace MoveStyler
                             
                             NewCharacterCount++;
 
-                            MoveStyle newCharacter = MoveStyle.MAX + NewCharacterCount;
+                            MoveStyle newMoveStyleEnum = MoveStyle.MAX + NewCharacterCount;
                             sfxID = SfxCollectionID.MAX + NewCharacterCount;
 
-                            if (_moveStyleIds.ContainsKey(newCharacter))
+                            if (_moveStyleIds.ContainsKey(newMoveStyleEnum))
                             {
-                                _moveStyleIds[newCharacter].Add(id);
+                                _moveStyleIds[newMoveStyleEnum].Add(id);
                             }
                             else
                             {
-                                _moveStyleIds.Add(newCharacter, new List<Guid>()
+                                _moveStyleIds.Add(newMoveStyleEnum, new List<Guid>()
                                 {
                                     id
                                 });
@@ -191,7 +182,7 @@ namespace MoveStyler
 
                             DebugLog.LogMessage("Create CustomMoveStyle");
                             //Create a new custom character instance and store it
-                            CustomMoveStyle customMoveStyle = new CustomMoveStyle(moveStyleDefinition, sfxID, (int)newCharacter);
+                            CustomMoveStyle customMoveStyle = new CustomMoveStyle(moveStyleDefinition, sfxID, (int)newMoveStyleEnum);
                             _customMoveStyle.Add(id, customMoveStyle);
                         }
                         else
@@ -268,6 +259,7 @@ namespace MoveStyler
                     return false;
             }
         }
+        
         private static bool GetCharacterName(MoveStyle character, out string name)
         {
             name = string.Empty;
@@ -374,42 +366,6 @@ namespace MoveStyler
             }
 
             return false;
-        }
-
-        public static void SetCustomMoveStylePropMode(Player player, MoveStyle setMoveStyle, bool forceOff = false)
-        {
-            //Will the player switch to on foot
-            bool ToOnfoot = setMoveStyle == MoveStyle.ON_FOOT && !forceOff;
-
-            //Read the internal property on player
-            MoveStyle styleEquipt = (MoveStyle)player.GetField("moveStyleEquipped").GetValue(player);
-
-            //Loop Through all Custom Movestyles
-            // TODO in future just process the relevant styles eg player.equipt or setMoveStyle#
-            foreach ( var style in _customMoveStyle)
-            {
-                
-                CharacterVisual.MoveStylePropMode mode = CharacterVisual.MoveStylePropMode.OFF;
-
-                if ( (int)styleEquipt == style.Value.Index && ToOnfoot) // If currently equipt and going to on foot
-                {
-                    mode = CharacterVisual.MoveStylePropMode.ON_BACK;
-                }
-                else if (setMoveStyle == (MoveStyle)style.Value.Index)
-                {
-                    mode = CharacterVisual.MoveStylePropMode.ACTIVE;
-                }
-                else
-                {
-                    mode = CharacterVisual.MoveStylePropMode.OFF;
-                }
-
-                DebugLog.LogMessage(String.Format("setProps: {0} Mode : {1} Index : {2} ", style.Value, mode, style.Value.Index));
-                //setPropMode
-                // Add new method to MoveStyleDefinition
-                style.Value.setCustomMoveStylePropsMode(player, (int)mode);
-            }
-
         }
 
         public static void advancePlayerMovementStyle(Player player, bool reverse = false)

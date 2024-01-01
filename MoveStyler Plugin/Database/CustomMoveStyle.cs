@@ -155,8 +155,10 @@ namespace MoveStyler.Data
 			GameObject parent = new GameObject($"{Definition.Movestylename} Visuals");
             MoveStyleDefinition moveStyleModel = UnityEngine.Object.Instantiate(Definition);
 
-            //InitCharacterModel
-            moveStyleModel.transform.SetParent(parent.transform, false);
+			Props.Clear();
+
+			//InitCharacterModel
+			moveStyleModel.transform.SetParent(parent.transform, false);
 
             //InitMeshRendererForProps and attachment
             for (int i = 0; i < moveStyleModel.PropRenderers.Length; i++)
@@ -175,83 +177,12 @@ namespace MoveStyler.Data
 
 			}
 
-            //InitAnimatorForModel
-            //moveStyleModel.GetComponentInChildren<Animator>().applyRootMotion = false;
-
             //InitCharacterVisuals
             parent.SetActive(false);
 
             _visual = parent;
         }
 
-		void setPropVisualAttachment(Player player, int Index)
-		{
-			if (player == null) { return; };
-
-			CharacterVisual charVisual = (CharacterVisual)player.GetField("characterVisual").GetValue(player);
-
-			if (charVisual == null) { return; };
-			//Set Transforms on Active Movestyle
-
-			Visual.transform.SetToIdentity();
-			Visual.transform.localScale = Vector3.one * 1f;
-
-
-			switch (Index)
-			{
-				case 0:
-					//ToDo
-					foreach (KeyValuePair<MeshRenderer, string> prop in Props)
-					{
-						if (prop.Key == null) { continue; }
-						
-						prop.Key.gameObject.SetActive(false);
-				
-					}
-					break;
-				case 1:
-					foreach (KeyValuePair<MeshRenderer, string> prop in Props)
-					{
-						if (prop.Key == null) { continue; }
-
-						GameObject obj = prop.Key.gameObject;
-
-						if (obj == null)
-						{
-							DebugLog.LogMessage("could not find Prop Obj");
-							return;
-						}
-
-						obj.transform.parent = charVisual.gameObject.transform.FindRecursive(prop.Value); //Attach to bone
-						obj.transform.SetToIdentity();
-						obj.transform.localScale = Vector3.one * 1f;
-						obj.SetActive(true);
-					}
-					break;
-
-				case 2:
-					//ToDo
-					foreach (KeyValuePair<MeshRenderer, string> prop in Props)
-					{
-						if (prop.Key == null) { continue; }
-
-						prop.Key.gameObject.SetActive(false);
-					}
-					Visual.SetActive(false);
-					break;
-
-				default:
-					foreach (KeyValuePair<MeshRenderer, string> prop in Props)
-					{
-						if (prop.Key == null) { continue; }
-
-						prop.Key.gameObject.SetActive(false);
-					}
-					Visual.SetActive(false);
-					break;
-			}
-		}
-	
         private void createAnimInfo()
         {
 			//Init Hash Values
@@ -589,49 +520,6 @@ namespace MoveStyler.Data
 			player.GetField("stats").SetValue(player, stats);
 		}
 
-        //Set the props mode for custom MoveStyles
-        public void setCustomMoveStylePropsMode(Player player , int Index)
-        {
-			/*
-            ON_BACK = 0,
-            ACTIVE = 1,
-            OFF = 2
-            */
-			
-			//Get Character Visual
-			CharacterVisual charVisual = (CharacterVisual)player.GetField("characterVisual").GetValue(player);
-
-			setPropVisualAttachment(player, Index);
-
-			/*
-			switch (Index)
-            {
-                case 0:
-					DebugLog.LogMessage("Set CustomMoveStyle on Back");
-					//Add the ability to use this
-					Visual.SetActive(false);
-                    //Do On Back Stuff
-                    break;
-
-                case 1:
-                    DebugLog.LogMessage("Set CustomMoveStyle Active");
-                    
-					//Do attach to Bone
-					break;
-
-                case 2:
-					DebugLog.LogMessage("Set CustomMoveStyle Off");
-					Visual.SetActive(false);
-                    break;
-                
-                default:
-                    Visual.SetActive(false); 
-                    break;
-            } 
-			*/
-		}
-
-
 		/*
         private void CreateSfxCollection()
         {
@@ -741,4 +629,4 @@ namespace MoveStyler.Data
         }
         */
 	}
-    }
+}

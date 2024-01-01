@@ -91,7 +91,7 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref Player __instance)
         {
-            DebugLog.LogMessage("Start Custom Init Animation");
+            //DebugLog.LogMessage("Start Custom Init Animation");
 
             MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
 
@@ -103,8 +103,6 @@ namespace MoveStyler.Patches
 
             for (int id = 1; id <= moveStyleDatabase.NewCharacterCount; id++)
             {
-
-                DebugLog.LogMessage(String.Format("Length of animInfoArray: {0}", animInfoSets.Length));
                 
                 MoveStyle moveStyle = id + MoveStyle.MAX;
                 
@@ -117,30 +115,24 @@ namespace MoveStyler.Patches
                     return;
                 }
 
-                Guid GUID;                  moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
-                CustomMoveStyle styleObj;   moveStyleDatabase.GetCharacter(GUID, out styleObj);
+                //Get CustomMovestyleObj from MoveStyle Int
+                Guid GUID;                  
+                moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
+                CustomMoveStyle styleObj;   
+                moveStyleDatabase.GetCharacter(GUID, out styleObj);
 
                 //Set anim info for the current custom movestyle
-                DebugLog.LogMessage(String.Format("Setting Anim Info for style: {0}", moveStyle));
-                
                 styleObj.setAnimInfo( ref __instance);
             }
-
-            DebugLog.LogMessage("Final Custom Anim Setup");
 
             //Return to default movestyle
             __instance.GetField("moveStyle").SetValue(__instance, originalStyle);
 
-            //Should have already been set
-            //this.moveStyle = moveStyle;
-            //this.animInfosSets[4] = this.animInfosSets[2];
-            //this.smoothRotation = !this.isAI;
-            //this.motor.smoothRotation = this.smoothRotation;
         }
     }
 
-    
-    [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")] //Reflection? idk what this does
+    /** Removed Because its no longer needed
+    [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")]
     public class PlayerPlayAnimPatch
     {
         private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
@@ -148,64 +140,9 @@ namespace MoveStyler.Patches
         public static bool Prefix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
         {
             return true; //Testing reEnabling normal anims
-
-            MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
-
-            // Process Custom Movestyles
-            if (equippedStyle > MoveStyle.MAX)
-            {
-                DebugLog.LogMessage(String.Format("Custom Play Anim: {0}", newAnim));
-
-                int curAnim = (int)__instance.GetField("curAnim").GetValue(__instance);
-
-                if ( /*!base.gameObject.activeSelf || */ (newAnim == curAnim && !forceOverwrite) )
-                {
-                    return false;
-                }
-
-                Animator anim = (Animator)__instance.GetField("anim").GetValue(__instance);
-
-                float normalizedTransitionDuration = 0f;
-                if (!instant)
-                {
-                    /*
-                    if (__instance.animInfos.ContainsKey(newAnim) && __instance.animInfos[newAnim].fadeFrom.ContainsKey(curAnim))
-                    {
-                        normalizedTransitionDuration = __instance.animInfos[newAnim].fadeFrom[curAnim];
-                    }
-                    else if (__instance.animInfos.ContainsKey(curAnim) && __instance.animInfos[curAnim].fadeTo.ContainsKey(newAnim))
-                    {
-                        normalizedTransitionDuration = __instance.animInfos[curAnim].fadeTo[newAnim];
-                    }
-                    */
-                }
-                if (atTime != -1f)
-                {
-                    anim.CrossFade(newAnim, normalizedTransitionDuration, -1, atTime);
-                }
-                else
-                {
-                    anim.CrossFade(newAnim, normalizedTransitionDuration);
-                }
-                
-                //Old
-                //__instance.curAnimActiveTime = 0f;
-                //__instance.firstFrameAnim = true;
-                //__instance.characterVisual.feetIK = (__instance.animInfos.ContainsKey(newAnim) && __instance.animInfos[newAnim].feetIK);
-
-                __instance.GetField("curAnimActiveTime").SetValue(__instance, 0f);
-                __instance.GetField("firstFrameAnim").SetValue(__instance, true);
-                __instance.GetField("curAnim").SetValue(__instance, newAnim);
-
-                return false;
-            }
-
-                //DebugLog.LogMessage(String.Format("newAnim : {0}", newAnim));
-
-            return true;
         }
     }
-    
+    */
     
     /*
     [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")] //Reflection? idk what this does
@@ -307,7 +244,7 @@ namespace MoveStyler.Patches
     }
     */
 
-    /*
+    /* To Do switch to a system that request movestyle switching by name
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
     public class PlayerSetMovestyleEquipped
     {

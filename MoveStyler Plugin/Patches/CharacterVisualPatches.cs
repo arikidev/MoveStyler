@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx.Logging;
 using HarmonyLib;
 using Reptile;
@@ -12,7 +13,52 @@ namespace MoveStyler.Patches
 
     // Patching the SetMoveStyleVisualProps to show custom Movestyles
 
-    
+    [HarmonyPatch(typeof(Reptile.CharacterVisual), nameof(CharacterVisual.InitMoveStyleProps))]
+    public class CharacterVisualInitMoveStylePropsPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Char Visual");
+
+        public static void Postfix(ref CharacterVisual __instance)
+        {
+            DebugLog.LogMessage("***************  Patch Init MovestyleProps  ****************");
+
+            //Create a base object to reference all movestyles
+            CustomMoveStyleVisualParent parent = __instance.gameObject.AddComponent<CustomMoveStyleVisualParent>();
+            if (parent == null) { DebugLog.LogMessage("CustomMoveSyleVisuals is null "); return; }
+
+            for (int index = 1; index <= moveStyleDatabase.NewCharacterCount; index++)
+            {
+                DebugLog.LogMessage($"movestyleLoop: {index} ");
+
+                CustomMoveStyle TempCustomStyle;
+
+                MoveStyle style = (MoveStyle)(index + MoveStyle.MAX);
+                moveStyleDatabase.GetCharacter(style, out TempCustomStyle);
+                GameObject obj = TempCustomStyle.Visual;
+
+                // For Each custom Movestyle create a customMoveStyleVisual
+                CustomMoveStyleVisual moveStyleVisual = new CustomMoveStyleVisual();
+                if (moveStyleVisual == null) { DebugLog.LogMessage("moveStyleVisual == null"); }
+                
+                foreach (KeyValuePair<MeshRenderer, string> prop in TempCustomStyle.Props)
+                {
+                    GameObject newObj = UnityEngine.Object.Instantiate(prop.Key.gameObject);
+
+                    if (newObj == null) { DebugLog.LogMessage("newObj == null"); }
+
+                    moveStyleVisual.AddPropObject( newObj, prop.Value);
+                }
+
+                //Store Custom Movestyle in CustomMoveStyleVisualParent
+                parent.CustomMoveStylesList.Add(new KeyValuePair<MoveStyle, CustomMoveStyleVisual>(style, moveStyleVisual));
+
+                DebugLog.LogMessage("Created new movestylePropObject ");
+            }
+
+            parent.SetupPropVisuals(__instance);
+        }
+    }
+
     [HarmonyPatch(typeof(Reptile.CharacterVisual), nameof(CharacterVisual.SetMoveStyleVisualProps))]
     public class CharacterSetMoveStyleVisualPropsPatch
     {
@@ -20,16 +66,15 @@ namespace MoveStyler.Patches
 
         public static void Postfix( ref CharacterVisual __instance ,Player player, MoveStyle setMoveStyle, bool forceOff = false)
         {
-            DebugLog.LogMessage(String.Format("Patch Set Prop: force? {0} ", forceOff ));
 
             if (player != null)
             {
                 //Get #CustomMoveStyles
                 MoveStyle equippedStyle = (MoveStyle)player.GetField("moveStyleEquipped").GetValue(player);
 
-                // Process Custom MoveStyles
-                DebugLog.LogMessage("Trying to set custom movement prop Mode");
-                moveStyleDatabase.SetCustomMoveStylePropMode(player, setMoveStyle, forceOff);
+                CustomMoveStyleVisualParent MovestyleVisualParent = __instance.GetComponent<CustomMoveStyleVisualParent>();
+                if (MovestyleVisualParent == null) { DebugLog.LogMessage("PropList is Null"); return; };
+                MovestyleVisualParent.SetCustomMoveStyleVisualsPropMode(player, setMoveStyle, forceOff);
             }
         }
     }
@@ -53,13 +98,7 @@ namespace MoveStyler.Patches
                     //Set to use custom anim controller using
                     __instance.anim.runtimeAnimatorController = styleObj.AnimController;
                 }
-
-                DebugLog.LogMessage("MoveStyle Custom overriding");
-                //return false;
             }
-
-            //DebugLog.LogMessage("MoveStyle Default");
-            //return true;
         }
     }
 }
