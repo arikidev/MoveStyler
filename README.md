@@ -1,7 +1,9 @@
 <p align="center">
   
+  ![Image](https://github.com/arikidev/MoveStyler/assets/33611857/19e04815-2815-48ec-af56-e2ff3eae19b1)
+
 </p>
-    
+
 This is a repository for a BepInEx plugin to load custom movestyles for the game *Bomb Rush Cyberfunk* 
 
 This is retooling of Giygas's CrewBoom and there are still numerous references to Crewboom code. Shoutout to Giygas for their work.
