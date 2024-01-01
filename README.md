@@ -15,8 +15,8 @@ Use the keys 'G,H' to navigate through default and custom movestyles
 ## Downloads, instructions and help
 
 ### [Plugin](https://github.com/arikidev/MoveStyler/releases)
-### [Unity project](https://github.com/arikidev/MoveStyler/releases/download/WIP-0.1-Proj/moveStylerProj.zip)
-### [Example Movestyle](https://github.com/arikidev/MoveStyler/releases/download/WIP_0.1_Example/MoveStyler_Ring.zip)
+### [Unity project](https://github.com/arikidev/MoveStyler/releases/tag/WIP-0.1-Proj)
+### [Example Movestyle](https://github.com/arikidev/MoveStyler/releases/tag/WIP_0.1_Example)
 
 To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
 The project works similar to Crew Boom so you can look at the instructions there for help.
