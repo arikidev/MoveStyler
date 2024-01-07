@@ -91,7 +91,7 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref Player __instance)
         {
-            //DebugLog.LogMessage("Start Custom Init Animation");
+            DebugLog.LogMessage("Start Init Animation Patch");
 
             MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
 
@@ -106,7 +106,7 @@ namespace MoveStyler.Patches
                 
                 MoveStyle moveStyle = id + MoveStyle.MAX;
                 
-                //Add new obj instance to the movestyle array
+                //Add a new Dictionary to the animInfo Array
                 animInfoSets[(int)moveStyle] =  new Dictionary<int, Player.AnimInfo>();
 
                 if (animInfoSets.Length < (int)moveStyle)
@@ -122,7 +122,7 @@ namespace MoveStyler.Patches
                 moveStyleDatabase.GetCharacter(GUID, out styleObj);
 
                 //Set anim info for the current custom movestyle
-                styleObj.setAnimInfo( ref __instance);
+                styleObj.InitCustomAnimInfo(__instance, moveStyle);
             }
 
             //Return to default movestyle

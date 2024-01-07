@@ -9,6 +9,7 @@ using System.Text;
 using CrewBoomAPI;
 using System.Linq;
 using UnityEngine.TextCore.Text;
+using Newtonsoft.Json;
 using MoveStyler.Data;
 using MoveStylerMono;
 
@@ -72,7 +73,7 @@ namespace MoveStyler
 
             foreach (string filePath in Directory.GetFiles(ASSET_PATH, "*.cbb"))
             {
-                if (LoadCharacterBundle(filePath, true))
+                if (LoadMoveStyleBundle(filePath, true))
                 {
                     foundAtLeastOneCharacter = true;
                 }
@@ -81,11 +82,11 @@ namespace MoveStyler
             return foundAtLeastOneCharacter;
         }
 
-        private static bool LoadCharacterBundle(string filePath, bool enableCypher)
+        private static bool LoadMoveStyleBundle(string filePath, bool enableCypher)
         {
             bool success = false;
 
-            DebugLog.LogMessage("Start LoadCharacterBundle");
+            DebugLog.LogMessage("Start LoadMOveStyleBundle");
 
             if (File.Exists(filePath) && Path.GetExtension(filePath) == ".cbb")
             {
@@ -114,31 +115,62 @@ namespace MoveStyler
                     }
                     if (moveStyleDefinition != null)
                     {
-                        //DebugLog.LogMessage("Found MovestyleDefinition");
+                        DebugLog.LogMessage("Found MovestyleDefinition");
                         string fileName = Path.GetFileName(filePath);
-                        /*
-                         * Reimplement Json at somepoint
+                        
+                        /** Reimplement Json at somepoint **/
                         string potentialConfigPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + ".json");
                         if (File.Exists(potentialConfigPath))
                         {
+                            DebugLog.LogMessage(potentialConfigPath);
+
                             string configData = File.ReadAllText(potentialConfigPath);
+
+                            //DebugLog.LogMessage(configData);
+
+                            
                             try
                             {
-                                CharacterConfig config = JsonUtility.FromJson<CharacterConfig>(configData);
+                                AnimConfig animConfig = JsonUtility.FromJson<AnimConfig>(configData);
+                                DebugLog.LogMessage("Created Anim Config");
+
+                                Array.Resize(ref moveStyleDefinition.AnimationInfoOverrides, animConfig.stringArray.Count());
+
+                                for (int index = 0; index < animConfig.stringArray.Count(); index++)
+                                {
+                                    //DebugLog.LogMessage("Start Fade Info");
+
+                                    string animInfoString = animConfig.stringArray[index];
+
+                                    CustomAnimInfo animInfoObj = JsonUtility.FromJson<CustomAnimInfo>(animInfoString);
+
+                                    getConfigFadeInfo(animInfoObj, animInfoString);
+
+                                    //DebugLog.LogMessage("Fade Info Complete");
+
+                                    moveStyleDefinition.AnimationInfoOverrides[index] = animInfoObj;
+
+                                }
+
+                                DebugLog.LogMessage("Added Anim Info Definitions");
+                                
+                                /*
+                                 CharacterConfig config = JsonUtility.FromJson<CharacterConfig>(configData);
                                 if (Enum.TryParse(config.CharacterToReplace, out BrcCharacter newCharacterReplacement))
                                 {
-                                    characterToReplace = newCharacterReplacement;
+                                    //characterToReplace = newCharacterReplacement;
                                 }
                                 else
                                 {
                                     DebugLog.LogWarning($"The configured replacement character for the bundle {fileName} (\"{config.CharacterToReplace}\") is not a valid character!");
-                                }
+                                }*/
+
                             }
                             catch (Exception)
                             {
                                 DebugLog.LogError($"Failed to read JSON config for \"{fileName}\"");
                             }
-                        } */
+                        }
 
                         StringBuilder characterLog = new StringBuilder();
                         characterLog.Append($"Loading \"{moveStyleDefinition.Movestylename}\"");
@@ -330,6 +362,7 @@ namespace MoveStyler
 
             return true;
         }
+        
         public static bool GetCharacter(MoveStyle character, out CustomMoveStyle characterObject)
         {
             characterObject = null;
@@ -435,5 +468,81 @@ namespace MoveStyler
             player.SetCurrentMoveStyleEquipped(newMovestyle);
 
         }
+
+        private static void getConfigFadeInfo(CustomAnimInfo Info, String Json)
+        {
+            
+            int start = Json.IndexOf("_fadeFrom", 0);
+            if (start == -1) { DebugLog.LogMessage("failed to find _fadeFrom in Json"); return; }
+            string stringFadeTo = Json.Substring(start + 12);
+            int end = stringFadeTo.IndexOf("]", 0);
+            stringFadeTo = stringFadeTo.Remove(end);
+
+            List<animFade> fadeList = new List<animFade>();
+
+            if (stringFadeTo.Length > 2)
+            {
+                string[] sep = { "},{" };
+
+                string[] fadeStrings = stringFadeTo.Split(sep, StringSplitOptions.None);
+ 
+                for (int ind = 0; ind < fadeStrings.Length; ind++)
+                {
+                    string str = fadeStrings[ind];
+                    if (ind == 0 && fadeStrings.Length > 1) { str += "}"; }
+                    else if (fadeStrings.Length == 1) { }
+                    else if (ind == fadeStrings.Length - 1 && fadeStrings.Length > 1) { str = "{" + str; }
+                    else { str = "{" + str + "}"; }
+                    animFade local = JsonUtility.FromJson<animFade>(str);
+                    //DebugLog.LogMessage(local.animName);
+                    fadeList.Add(local);
+                }
+
+            }
+
+            Info._fadeFrom = fadeList.ToArray();
+
+            //FadeTo Info ****************
+            start = Json.IndexOf("_fadeTo", 0);
+            if (start == -1) { DebugLog.LogMessage("failed to find _fadeTo in Json"); return; }
+            stringFadeTo = Json.Substring(start + 10);
+            end = stringFadeTo.IndexOf("]", 0);
+            stringFadeTo = stringFadeTo.Remove(end);
+
+            List<animFade> fadeList2 = new List<animFade>();
+
+            if (stringFadeTo.Length > 2)
+            {
+                string[] sep = { "},{" };
+
+                string[] fadeStrings = stringFadeTo.Split(sep, StringSplitOptions.None);
+
+                for (int ind = 0; ind < fadeStrings.Length; ind++)
+                {
+
+                    string str = fadeStrings[ind];
+                    if (ind == 0 && fadeStrings.Length > 1) { str += "}"; }
+                    else if (fadeStrings.Length == 1) { }
+                    else if (ind == fadeStrings.Length - 1 && fadeStrings.Length > 1) { str = "{" + str; }
+                    else { str = "{" + str + "}"; }
+
+                    
+                    animFade local = JsonUtility.FromJson<animFade>(str);
+                    
+                    fadeList2.Add(local);
+                }
+
+            }
+
+            Info._fadeTo = fadeList2.ToArray();
+        }
+
+
+    }
+
+    [Serializable]
+    public class AnimConfig
+    {
+        public List<string> stringArray;
     }
 }
