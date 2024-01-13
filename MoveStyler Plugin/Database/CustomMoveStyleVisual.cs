@@ -16,6 +16,9 @@ namespace MoveStyler.Data
 
         public List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>> CustomMoveStylesList;
 
+        public bool LHandIKCurrent = false;
+        public bool RHandIKCurrent = false;
+
         public CustomMoveStyleVisualParent()
         {
             CustomMoveStylesList = new List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>>();
@@ -54,10 +57,10 @@ namespace MoveStyler.Data
 
         public void SetupPropVisuals(CharacterVisual characterVisual)
         {
-            
+
             Transform characterVisualTransform = characterVisual.gameObject.transform;
 
-            foreach (KeyValuePair<MoveStyle, CustomMoveStyleVisual> style in CustomMoveStylesList )
+            foreach (KeyValuePair<MoveStyle, CustomMoveStyleVisual> style in CustomMoveStylesList)
             {
                 foreach (KeyValuePair<string, GameObject> prop in style.Value.Props)
                 {
@@ -67,6 +70,13 @@ namespace MoveStyler.Data
                     prop.Value.SetActive(true);
                 }
             }
+        }
+
+        static public CustomMoveStyleVisualParent GetCustomMoveStyleVisualParent(CharacterVisual Char)   
+        {
+            CustomMoveStyleVisualParent parent = Char.GetComponentInChildren<CustomMoveStyleVisualParent>();
+
+            return parent;
         }
     }
 

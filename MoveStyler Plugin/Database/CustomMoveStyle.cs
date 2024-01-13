@@ -26,6 +26,7 @@ namespace MoveStyler.Data
 		public Animator Anim;
 
 		public List<CustomAnimInfo> _customAnimInfo;
+		public Dictionary<int, CustomAnimInfo> customAnimInfoDict;
 
 		public MovementStats movementStats;
 
@@ -170,7 +171,7 @@ namespace MoveStyler.Data
 
 		private void createAnimInfo()
 		{
-			DebugLog.LogMessage("Custom Movestyle | Create Anim Info");
+			//DebugLog.LogMessage("Custom Movestyle | Create Anim Info");
 
 			//Init Hash Values
 			this.canSprayHash = Animator.StringToHash("canSpray");
@@ -193,10 +194,12 @@ namespace MoveStyler.Data
 
 			//Init and fill _custonAnimInfo
 			_customAnimInfo = new List<CustomAnimInfo>();
+			customAnimInfoDict = new Dictionary<int, CustomAnimInfo>();
 
 			foreach (CustomAnimInfo info in Definition.AnimationInfoOverrides)
 			{
 				_customAnimInfo.Add(info);
+				customAnimInfoDict.Add(Animator.StringToHash(info.animName), info);
 			}
 		}
 
@@ -215,7 +218,7 @@ namespace MoveStyler.Data
 			//Set Player Movestyle to custom Movestyle
 			_player.GetField("moveStyle").SetValue(_player, ParentMovestyle);
 
-			DebugLog.LogMessage("setParentAnimInfo");
+			//DebugLog.LogMessage("setParentAnimInfo");
 			switch (ParentMovestyle)
 			{
 				case MoveStyle.BMX:
@@ -1397,7 +1400,7 @@ namespace MoveStyler.Data
 
 		private void setCustomAnimInfoOverrides(Player _player, MoveStyle Movestyle)
 		{
-			DebugLog.LogMessage("set Custom Anim Info Overrides");
+			//DebugLog.LogMessage("set Custom Anim Info Overrides");
 
 			Dictionary<int, Player.AnimInfo> animInfoDict = new Dictionary<int, Player.AnimInfo>();
 
@@ -1406,28 +1409,64 @@ namespace MoveStyler.Data
 
 			foreach ( CustomAnimInfo row in _customAnimInfo)
 			{
-				DebugLog.LogMessage($"Adding Override for: {row.animName}");
+				//DebugLog.LogMessage($"Adding Override for: {row.animName}");
 
-				//Try Remove Old AnimInfo
+				Dictionary<int, float> oldFade2;
+				Dictionary<int, float> oldFadeFrom;
+
+				//Try Remove Old AnimInfo //TODO replace this with merge
+				if (customAnimInfoArray[(int)Movestyle].ContainsKey(Animator.StringToHash(row.animName)))
+				{
+					oldFade2 = customAnimInfoArray[(int)Movestyle][Animator.StringToHash(row.animName)].fadeTo;
+					oldFadeFrom = customAnimInfoArray[(int)Movestyle][Animator.StringToHash(row.animName)].fadeFrom;
+				}
+				else
+				{
+					oldFade2 = new Dictionary<int, float>();
+					oldFadeFrom = new Dictionary<int, float>();
+				}
+				//Remove old AnimInfo
 				customAnimInfoArray[(int)Movestyle].Remove(Animator.StringToHash(row.animName));
 
 				// Create and add new key to player
 				Player.AnimInfo animInfo = new Player.AnimInfo(_player, row.animName, (Player.AnimType)row.animType, row.nextAnim, row.interruptIntoFallFrom, row.nextAnimAtTime, row.duration);
-				DebugLog.LogMessage("Created New Player Info");
+				//DebugLog.LogMessage("Created New Player Info");
+
+				animInfo.fadeTo = oldFade2;
+				animInfo.fadeFrom = oldFadeFrom;
 
 				animInfo.skipStartrun = row.skipStartrun;
 				animInfo.feetIK = row.feetIK;
 
-				DebugLog.LogMessage("start  FadeTo");
+				//DebugLog.LogMessage("start  FadeTo");
 				foreach (animFade fade in row._fadeTo)
 				{
-					animInfo.fadeTo.Add(Animator.StringToHash(fade.animName), fade.fadeDuration);
+					int animHash = Animator.StringToHash(fade.animName);
+
+					//If animInfoFade already exists override with new data
+					if (animInfo.fadeTo.ContainsKey(animHash))
+					{
+						animInfo.fadeTo[animHash] = fade.fadeDuration;
+					}
+					else
+                    {
+						animInfo.fadeTo.Add(animHash, fade.fadeDuration);
+					}
 				}
 
-				DebugLog.LogMessage("start  FadeFrom");
+				//DebugLog.LogMessage("start  FadeFrom");
 				foreach (animFade fade in row._fadeFrom)
 				{
-					animInfo.fadeFrom.Add(Animator.StringToHash(fade.animName), fade.fadeDuration);
+					int animHash = Animator.StringToHash(fade.animName);
+
+					if (animInfo.fadeFrom.ContainsKey(animHash))
+					{
+						animInfo.fadeFrom[animHash] = fade.fadeDuration;
+					}
+					else
+					{
+						animInfo.fadeFrom.Add(animHash, fade.fadeDuration);
+					}
 				}
 			}
 

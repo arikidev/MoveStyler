@@ -23,7 +23,7 @@ namespace MoveStyler.Patches
         {
             if (setMoveStyleEquipped > MoveStyle.MAX)
             {
-                DebugLog.LogMessage("Set Movestyle Equipt is custom");
+                //DebugLog.LogMessage("Set Movestyle Equipt is custom");
                 return true;
             }
 
@@ -38,11 +38,11 @@ namespace MoveStyler.Patches
 
         public static bool Prefix(ref Player __instance, MoveStyle setMoveStyle, bool changeProp, bool changeAnim, GameObject specialSkateboard = null)
         {
-            DebugLog.LogMessage("Patching SetMoveStyle:");
+            //DebugLog.LogMessage("Patching SetMoveStyle:");
 
             if (setMoveStyle > MoveStyle.MAX)
             {
-                DebugLog.LogMessage("setMovestyle is custom");
+                //DebugLog.LogMessage("setMovestyle is custom");
 
                 CharacterVisual characterVisual = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
 
@@ -66,7 +66,7 @@ namespace MoveStyler.Patches
                 //Apply Visual Change to CustomMoveStyle
                 if (changeProp)
                 {
-                    DebugLog.LogMessage("Updating Visual");
+                    //DebugLog.LogMessage("Updating Visual");
                     characterVisual.SetMoveStyleVisualProps(__instance, setMoveStyle, false);
                 }
 
@@ -78,7 +78,7 @@ namespace MoveStyler.Patches
 
                 return false; // Skip is Enum is Custom
             }
-            DebugLog.LogMessage("SetMovestyle is default style");
+            //DebugLog.LogMessage("SetMovestyle is default style");
 
             return true;
         }
@@ -91,7 +91,7 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref Player __instance)
         {
-            DebugLog.LogMessage("Start Init Animation Patch");
+            //DebugLog.LogMessage("Start Init Animation Patch");
 
             MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
 
@@ -116,10 +116,7 @@ namespace MoveStyler.Patches
                 }
 
                 //Get CustomMovestyleObj from MoveStyle Int
-                Guid GUID;                  
-                moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
-                CustomMoveStyle styleObj;   
-                moveStyleDatabase.GetCharacter(GUID, out styleObj);
+                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(moveStyle, out styleObj);
 
                 //Set anim info for the current custom movestyle
                 styleObj.InitCustomAnimInfo(__instance, moveStyle);
@@ -131,217 +128,277 @@ namespace MoveStyler.Patches
         }
     }
 
-    /** Removed Because its no longer needed
+
+    // Update Animation Patch to send through Player Speed to the Animator
+    [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")]
+    public class PlayerUpdateAnimPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+        public static void Postfix(ref Player __instance)
+        {
+            float speed = __instance.GetForwardSpeed();
+            CharacterVisual charVis = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
+            Animator anim = charVis.anim;
+
+            charVis.anim.SetFloat("forwardSpeed", speed);
+
+            //DebugLog.LogMessage($"forwardSpeed : {speed}");
+            //DebugLog.LogMessage($"forwardSpeedGet : {charVis.anim.GetFloat("forwardSpeed")}");
+
+        }
+
+    }
+
+    // Allow induvidual animations override the HandIk settings.
     [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")]
     public class PlayerPlayAnimPatch
     {
         private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
 
-        public static bool Prefix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
+        public static void Postfix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
         {
-            return true; //Testing reEnabling normal anims
-        }
-    }
-    */
-    
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")] //Reflection? idk what this does
-    public class PlayerUpdateAnimPatch
-    {
-        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
-
-        public static bool Prefix(ref Player __instance)
-        {
-            return true; //Testing reEnabling normal anims
-
-            MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
-
-            // Process Custom Movestyles
-            if (equippedStyle > MoveStyle.MAX)
+            MoveStyle style = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
+            
+            if  (style > MoveStyle.MAX)
             {
-                //DebugLog.LogMessage("Custom Update Anim");
-                return false;
-            }
+                CustomMoveStyle customMovestyle; moveStyleDatabase.GetCharacter(style, out customMovestyle);
+                CharacterVisual charVis = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
 
-            return true;
-        }
-    }
-    */
 
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCharacter))]
-    public class PlayerInitOverridePatch
-    {
-        public static void Prefix(ref Characters setChar)
-        {
-            if (CharacterDatabase.HasCharacterOverride)
-            {
-                if (CharacterDatabase.GetCharacterValueFromGuid(CharacterDatabase.CharacterOverride, out Characters character))
+                bool lHandIK = customMovestyle.Definition.UseHandLIK;
+                bool rHandIK = customMovestyle.Definition.UseHandRIK;
+
+                // If Custom animInfo is preset check IK tags
+                if (customMovestyle.customAnimInfoDict.ContainsKey(newAnim))
                 {
-                    if (character > Characters.MAX)
+                    lHandIK = customMovestyle.customAnimInfoDict[newAnim].lHandIKOverride ^ customMovestyle.Definition.UseHandLIK;
+                    rHandIK = customMovestyle.customAnimInfoDict[newAnim].rHandIKOverride ^ customMovestyle.Definition.UseHandRIK;
+                }
+
+                charVis.GetField("handIKActiveL").SetValue(charVis, lHandIK);
+                charVis.GetField("handIKActiveR").SetValue(charVis, rHandIK);
+
+                CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(charVis);
+                parent.LHandIKCurrent = lHandIK;
+                parent.RHandIKCurrent = rHandIK;
+
+                //DebugLog.LogMessage($" PlayAnimtion: {newAnim} ik: {lHandIK} | {rHandIK} ");
+            }
+        }
+    }
+
+            /** Removed Because its no longer needed
+            [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")]
+            public class PlayerPlayAnimPatch
+            {
+                private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+                public static bool Prefix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
+                {
+                    return true; //Testing reEnabling normal anims
+                }
+            }
+            */
+
+            /*
+            [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")] //Reflection? idk what this does
+            public class PlayerUpdateAnimPatch
+            {
+                private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
+                public static bool Prefix(ref Player __instance)
+                {
+                    return true; //Testing reEnabling normal anims
+
+                    MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
+
+                    // Process Custom Movestyles
+                    if (equippedStyle > MoveStyle.MAX)
                     {
-                        setChar = character;
+                        //DebugLog.LogMessage("Custom Update Anim");
+                        return false;
                     }
+
+                    return true;
                 }
             }
-        }
+            */
 
-        public static void Postfix(Player __instance, Characters setChar)
-        {
-            if (CharacterDatabase.HasCharacterOverride)
+            /*
+            [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCharacter))]
+            public class PlayerInitOverridePatch
             {
-                CharacterDatabase.SetCharacterOverrideDone();
-            }
-
-            if (__instance == WorldHandler.instance.GetCurrentPlayer())
-            {
-                if (CharacterDatabase.GetCharacter(setChar, out CustomCharacter character))
+                public static void Prefix(ref Characters setChar)
                 {
-                    var info = new CrewBoomAPI.CharacterInfo(character.Definition.CharacterName, character.Definition.GraffitiName);
-                    CrewBoomAPIDatabase.UpdatePlayerCharacter(info);
-                }
-                else
-                {
-                    CrewBoomAPIDatabase.UpdatePlayerCharacter(null);
-                }
-            }
-        }
-    }
-    */
-
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetOutfit))]
-    public class PlayerSetOutfitPatch
-    {
-        public static bool Prefix(int setOutfit, Player __instance, CharacterVisual ___characterVisual, Characters ___character)
-        {
-            if (!CharacterDatabase.HasCharacter(___character))
-            {
-                return true;
-            }
-
-            bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
-            if (!isAi)
-            {
-                Core.Instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(___character).outfit = setOutfit;
-
-                if (___character > Characters.MAX)
-                {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(___character, out Guid guid))
+                    if (CharacterDatabase.HasCharacterOverride)
                     {
-                        CharacterSaveSlots.SaveCharacterData(guid);
-                    }
-                }
-            }
-
-            if (CharUtil.TrySetCustomOutfit(___characterVisual, setOutfit, out SkinnedMeshRenderer firstActiveRenderer))
-            {
-                ___characterVisual.mainRenderer = firstActiveRenderer;
-            }
-
-            return false;
-        }
-    }
-    */
-
-    /* To Do switch to a system that request movestyle switching by name
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
-    public class PlayerSetMovestyleEquipped
-    {
-        public static void Postfix(Player __instance, MoveStyle setMoveStyleEquipped)
-        {
-            bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
-            if (!isAi)
-            {
-                Characters character = (Characters) __instance.GetField("character").GetValue(__instance);
-                if (character > Characters.MAX)
-                {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(character, out Guid guid))
-                    {
-                        if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress))
+                        if (CharacterDatabase.GetCharacterValueFromGuid(CharacterDatabase.CharacterOverride, out Characters character))
                         {
-                            progress.moveStyle = setMoveStyleEquipped;
-                            CharacterSaveSlots.SaveCharacterData(guid);
+                            if (character > Characters.MAX)
+                            {
+                                setChar = character;
+                            }
+                        }
+                    }
+                }
+
+                public static void Postfix(Player __instance, Characters setChar)
+                {
+                    if (CharacterDatabase.HasCharacterOverride)
+                    {
+                        CharacterDatabase.SetCharacterOverrideDone();
+                    }
+
+                    if (__instance == WorldHandler.instance.GetCurrentPlayer())
+                    {
+                        if (CharacterDatabase.GetCharacter(setChar, out CustomCharacter character))
+                        {
+                            var info = new CrewBoomAPI.CharacterInfo(character.Definition.CharacterName, character.Definition.GraffitiName);
+                            CrewBoomAPIDatabase.UpdatePlayerCharacter(info);
+                        }
+                        else
+                        {
+                            CrewBoomAPIDatabase.UpdatePlayerCharacter(null);
                         }
                     }
                 }
             }
-        }
-    }
-    */
+            */
 
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), "SaveSelectedCharacter")]
-    public class PlayerSaveCharacterPatch
-    {
-        public static bool Prefix(Player __instance, ref Characters selectedCharacter)
-        {
-            bool runOriginal = true;
-
-            bool isAI = (bool) __instance.GetField("isAI").GetValue(__instance);
-            bool isNew = selectedCharacter > Characters.MAX;
-            if (!isAI)
+            /*
+            [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetOutfit))]
+            public class PlayerSetOutfitPatch
             {
-                CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = Guid.Empty;
-
-                if (isNew)
+                public static bool Prefix(int setOutfit, Player __instance, CharacterVisual ___characterVisual, Characters ___character)
                 {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(selectedCharacter, out Guid guid))
+                    if (!CharacterDatabase.HasCharacter(___character))
                     {
-                        CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = guid;
+                        return true;
                     }
-                    runOriginal = false;
-                }
 
-                CharacterSaveSlots.SaveSlot();
-            }
-            else if (selectedCharacter > Characters.MAX)
-            {
-                runOriginal = false;
-            }
+                    bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
+                    if (!isAi)
+                    {
+                        Core.Instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(___character).outfit = setOutfit;
 
-            return runOriginal;
-        }
-    }
-    */
+                        if (___character > Characters.MAX)
+                        {
+                            if (CharacterDatabase.GetFirstOrConfigCharacterId(___character, out Guid guid))
+                            {
+                                CharacterSaveSlots.SaveCharacterData(guid);
+                            }
+                        }
+                    }
 
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Player.PlayVoice))]
-    public class PlayerVoicePatch
-    {
-        public static bool Prefix(AudioClipID audioClipID,
-                                  VoicePriority voicePriority,
-                                  bool fromPlayer,
-                                  AudioManager ___audioManager,
-                                  ref VoicePriority ___currentVoicePriority,
-                                  Characters ___character,
-                                  AudioSource ___playerGameplayVoicesAudioSource)
-        {
-            if (___character > Characters.MAX && CharacterDatabase.GetCharacter(___character, out CustomCharacter customCharacter))
-            {
-                if (fromPlayer)
-                {
-                    //ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("Test");
-                    //log.LogMessage(___currentVoicePriority);
+                    if (CharUtil.TrySetCustomOutfit(___characterVisual, setOutfit, out SkinnedMeshRenderer firstActiveRenderer))
+                    {
+                        ___characterVisual.mainRenderer = firstActiveRenderer;
+                    }
 
-                    //___audioManager.InvokeMethod("PlayVoice",
-                    //    new Type[] { typeof(VoicePriority).MakeByRefType(), typeof(Characters), typeof(AudioClipID), typeof(AudioSource), typeof(VoicePriority) },
-                    //    ___currentVoicePriority, ___character, audioClipID, ___playerGameplayVoicesAudioSource, voicePriority);
-
-                    //log.LogMessage(___currentVoicePriority);
-                }
-                else
-                {
-                    ___audioManager.InvokeMethod("PlaySfxGameplay",
-                        new Type[] { typeof(SfxCollectionID), typeof(AudioClipID), typeof(float) },
-                        customCharacter.SfxID, audioClipID, 0.0f);
                     return false;
                 }
-
             }
+            */
 
-            return true;
+            /* To Do switch to a system that request movestyle switching by name
+            [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
+            public class PlayerSetMovestyleEquipped
+            {
+                public static void Postfix(Player __instance, MoveStyle setMoveStyleEquipped)
+                {
+                    bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
+                    if (!isAi)
+                    {
+                        Characters character = (Characters) __instance.GetField("character").GetValue(__instance);
+                        if (character > Characters.MAX)
+                        {
+                            if (CharacterDatabase.GetFirstOrConfigCharacterId(character, out Guid guid))
+                            {
+                                if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress))
+                                {
+                                    progress.moveStyle = setMoveStyleEquipped;
+                                    CharacterSaveSlots.SaveCharacterData(guid);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            */
+
+            /*
+            [HarmonyPatch(typeof(Reptile.Player), "SaveSelectedCharacter")]
+            public class PlayerSaveCharacterPatch
+            {
+                public static bool Prefix(Player __instance, ref Characters selectedCharacter)
+                {
+                    bool runOriginal = true;
+
+                    bool isAI = (bool) __instance.GetField("isAI").GetValue(__instance);
+                    bool isNew = selectedCharacter > Characters.MAX;
+                    if (!isAI)
+                    {
+                        CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = Guid.Empty;
+
+                        if (isNew)
+                        {
+                            if (CharacterDatabase.GetFirstOrConfigCharacterId(selectedCharacter, out Guid guid))
+                            {
+                                CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = guid;
+                            }
+                            runOriginal = false;
+                        }
+
+                        CharacterSaveSlots.SaveSlot();
+                    }
+                    else if (selectedCharacter > Characters.MAX)
+                    {
+                        runOriginal = false;
+                    }
+
+                    return runOriginal;
+                }
+            }
+            */
+
+            /*
+            [HarmonyPatch(typeof(Reptile.Player), nameof(Player.PlayVoice))]
+            public class PlayerVoicePatch
+            {
+                public static bool Prefix(AudioClipID audioClipID,
+                                          VoicePriority voicePriority,
+                                          bool fromPlayer,
+                                          AudioManager ___audioManager,
+                                          ref VoicePriority ___currentVoicePriority,
+                                          Characters ___character,
+                                          AudioSource ___playerGameplayVoicesAudioSource)
+                {
+                    if (___character > Characters.MAX && CharacterDatabase.GetCharacter(___character, out CustomCharacter customCharacter))
+                    {
+                        if (fromPlayer)
+                        {
+                            //ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("Test");
+                            //log.LogMessage(___currentVoicePriority);
+
+                            //___audioManager.InvokeMethod("PlayVoice",
+                            //    new Type[] { typeof(VoicePriority).MakeByRefType(), typeof(Characters), typeof(AudioClipID), typeof(AudioSource), typeof(VoicePriority) },
+                            //    ___currentVoicePriority, ___character, audioClipID, ___playerGameplayVoicesAudioSource, voicePriority);
+
+                            //log.LogMessage(___currentVoicePriority);
+                        }
+                        else
+                        {
+                            ___audioManager.InvokeMethod("PlaySfxGameplay",
+                                new Type[] { typeof(SfxCollectionID), typeof(AudioClipID), typeof(float) },
+                                customCharacter.SfxID, audioClipID, 0.0f);
+                            return false;
+                        }
+
+                    }
+
+                    return true;
+                }
+            }
+            */
         }
-    }
-    */
-}

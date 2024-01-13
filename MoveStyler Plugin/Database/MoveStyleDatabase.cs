@@ -292,7 +292,7 @@ namespace MoveStyler
             }
         }
         
-        private static bool GetCharacterName(MoveStyle character, out string name)
+        public static bool GetCharacterName(MoveStyle character, out string name)
         {
             name = string.Empty;
 
@@ -467,7 +467,22 @@ namespace MoveStyler
             player.SetCurrentMoveStyleEquipped(0);
             player.SetCurrentMoveStyleEquipped(newMovestyle);
 
+            Core instance = Core.Instance;
+            Characters playerChar = (Characters)player.GetField("character").GetValue(player);
+            instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = newMovestyle;
+
         }
+
+        public static void setPlayerMovementStyle(Player player, MoveStyle moveStyle)
+        {
+            player.SetCurrentMoveStyleEquipped(0);
+            player.SetCurrentMoveStyleEquipped(moveStyle);
+
+            Core instance = Core.Instance;
+            Characters playerChar = (Characters)player.GetField("character").GetValue(player);
+            instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = moveStyle;
+        }
+
 
         private static void getConfigFadeInfo(CustomAnimInfo Info, String Json)
         {
@@ -536,7 +551,6 @@ namespace MoveStyler
 
             Info._fadeTo = fadeList2.ToArray();
         }
-
 
     }
 

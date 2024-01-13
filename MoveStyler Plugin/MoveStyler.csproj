@@ -25,6 +25,9 @@
 	<Reference Include="Assembly-CSharp">
 		<HintPath>Libraries/Assembly-CSharp.dll</HintPath>
 	</Reference>
+	<Reference Include="CommonAPI">
+	  <HintPath>..\..\..\..\..\Downloads\LazyDuchess-CommonAPI\CommonAPI.dll</HintPath>
+	</Reference>
 	<Reference Include="Unity.TextMeshPro">
 		<HintPath>Libraries/Unity.TextMeshPro.dll</HintPath>
 	</Reference>

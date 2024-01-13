@@ -28,7 +28,7 @@ namespace MoveStyler.Patches
 
             for (int index = 1; index <= moveStyleDatabase.NewCharacterCount; index++)
             {
-                DebugLog.LogMessage($"movestyleLoop: {index} ");
+                //DebugLog.LogMessage($"movestyleLoop: {index} ");
 
                 CustomMoveStyle TempCustomStyle;
 
@@ -91,8 +91,8 @@ namespace MoveStyler.Patches
 
             if (setMoveStyle > MoveStyle.MAX)
             {
-                Guid GUID; moveStyleDatabase.GetFirstOrConfigMoveStyleId(setMoveStyle, out GUID);
-                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(GUID, out styleObj);
+
+                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(setMoveStyle, out styleObj);
 
                 if (styleObj != null)
                 {
@@ -100,10 +100,14 @@ namespace MoveStyler.Patches
                     __instance.anim.runtimeAnimatorController = styleObj.AnimController;
 
                     //Set use handIK
-                    __instance.GetField("handIKActiveR").SetValue(__instance, styleObj.Definition.UseHandIK);
-                    __instance.GetField("handIKActiveL").SetValue(__instance, styleObj.Definition.UseHandIK);
+                    __instance.GetField("handIKActiveR").SetValue(__instance, styleObj.Definition.UseHandRIK);
+                    __instance.GetField("handIKActiveL").SetValue(__instance, styleObj.Definition.UseHandLIK);
 
-                    DebugLog.LogMessage($"Set hand IK : {styleObj.Definition.UseHandIK}");
+                    CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
+                    parent.LHandIKCurrent = styleObj.Definition.UseHandLIK;
+                    parent.RHandIKCurrent = styleObj.Definition.UseHandRIK;
+
+                    //DebugLog.LogMessage($"Set hand IK : {styleObj.Definition.UseHandRIK} | {styleObj.Definition.UseHandLIK}");
                 }
             }
         }
@@ -121,18 +125,19 @@ namespace MoveStyler.Patches
 
             if (moveStyle > MoveStyle.MAX)
             {
-                Guid GUID; moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
-                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(GUID, out styleObj);
+                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(moveStyle, out styleObj);
 
                 if (styleObj != null)
                 {
 
-                    bool setIK = !set && styleObj.Definition.UseHandIK;
+                    CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
+
+                    bool setIK = set || parent.RHandIKCurrent;
 
                     //Set use handIK
-                    __instance.GetField("handIKActiveR").SetValue(__instance, styleObj.Definition.UseHandIK);
+                    __instance.GetField("handIKActiveR").SetValue(__instance, setIK);
 
-                    DebugLog.LogMessage($"Set hand IK : {styleObj.Definition.UseHandIK}");
+                    //DebugLog.LogMessage($"Set hand IK : {setIK}");
                 }
             } 
         }
@@ -150,17 +155,18 @@ namespace MoveStyler.Patches
 
             if (moveStyle > MoveStyle.MAX)
             {
-                Guid GUID; moveStyleDatabase.GetFirstOrConfigMoveStyleId(moveStyle, out GUID);
-                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(GUID, out styleObj);
+                CustomMoveStyle styleObj; moveStyleDatabase.GetCharacter(moveStyle, out styleObj);
 
                 if (styleObj != null)
                 {
-                    bool setIK = !set && styleObj.Definition.UseHandIK;
+                    CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
+
+                    bool setIK = set || parent.LHandIKCurrent;
 
                     //Set use handIK
-                    __instance.GetField("handIKActiveL").SetValue(__instance, styleObj.Definition.UseHandIK);
+                    __instance.GetField("handIKActiveL").SetValue(__instance, setIK);
 
-                    DebugLog.LogMessage($"Set hand IK : {styleObj.Definition.UseHandIK}");
+                    //DebugLog.LogMessage($"Set hand IK : {setIK}");
                 }
             }
         }
