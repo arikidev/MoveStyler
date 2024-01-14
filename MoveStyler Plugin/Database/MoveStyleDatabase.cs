@@ -9,7 +9,6 @@ using System.Text;
 using CrewBoomAPI;
 using System.Linq;
 using UnityEngine.TextCore.Text;
-using Newtonsoft.Json;
 using MoveStyler.Data;
 using MoveStylerMono;
 

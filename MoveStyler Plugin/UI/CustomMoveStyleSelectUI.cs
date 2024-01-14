@@ -28,7 +28,6 @@ namespace MoveStyler.UI
             PhoneAPI.RegisterApp<MoveStylerApp>("MoveStyles", Icon);
         }
 
-        
         public override void OnAppInit()
         {
             base.OnAppInit();
