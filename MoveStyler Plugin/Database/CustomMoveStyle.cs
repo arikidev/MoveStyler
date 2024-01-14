@@ -152,7 +152,7 @@ namespace MoveStyler.Data
 			{
 				MeshRenderer renderer = moveStyleModel.PropRenderers[i];
 				string bone = moveStyleModel.PropAttachmentBones[i];
-				DebugLog.LogMessage("Bone:" + bone);
+				//DebugLog.LogMessage("Bone:" + bone);
 
 				renderer.receiveShadows = false;
 				renderer.gameObject.layer = 15;
@@ -160,7 +160,7 @@ namespace MoveStyler.Data
 				renderer.gameObject.transform.SetParent(parent.transform);
 
 				Props.Add(new KeyValuePair<MeshRenderer, string>(renderer, bone));
-				DebugLog.LogMessage("Renderer: " + renderer.name);
+				//DebugLog.LogMessage("Renderer: " + renderer.name);
 			}
 
 			//InitCharacterVisuals
@@ -212,8 +212,8 @@ namespace MoveStyler.Data
 			//Array.Resize(ref customAnimInfoArray, moveStyleDatabase.NewCharacterCount + 5);
 			//_player.GetField("animInfosSets").SetValue(_player, customAnimInfoArray);
 
-			DebugLog.LogMessage(_player);
-			DebugLog.LogMessage(ParentMovestyle);
+			//DebugLog.LogMessage(_player);
+			//DebugLog.LogMessage(ParentMovestyle);
 
 			//Set Player Movestyle to custom Movestyle
 			_player.GetField("moveStyle").SetValue(_player, ParentMovestyle);
@@ -1470,7 +1470,7 @@ namespace MoveStyler.Data
 				}
 			}
 
-			DebugLog.LogMessage("Finished Custom Anim Overrides");
+			//DebugLog.LogMessage("Finished Custom Anim Overrides");
 
 		}
 

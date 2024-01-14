@@ -158,13 +158,16 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
         {
+            if (__instance == null) { DebugLog.LogMessage($"player instance is null"); return; }
+
             MoveStyle style = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
-            
+
             if  (style > MoveStyle.MAX)
             {
                 CustomMoveStyle customMovestyle; moveStyleDatabase.GetCharacter(style, out customMovestyle);
                 CharacterVisual charVis = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
 
+                if (charVis == null || customMovestyle == null) { DebugLog.LogMessage($"character visual or customMovestyle is null"); return; }
 
                 bool lHandIK = customMovestyle.Definition.UseHandLIK;
                 bool rHandIK = customMovestyle.Definition.UseHandRIK;
@@ -176,10 +179,9 @@ namespace MoveStyler.Patches
                     rHandIK = customMovestyle.customAnimInfoDict[newAnim].rHandIKOverride ^ customMovestyle.Definition.UseHandRIK;
                 }
 
-                charVis.GetField("handIKActiveL").SetValue(charVis, lHandIK);
-                charVis.GetField("handIKActiveR").SetValue(charVis, rHandIK);
-
                 CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(charVis);
+                if (parent == null) { DebugLog.LogMessage($"CustomMoveStyleVisualParent is null"); return; }
+
                 parent.LHandIKCurrent = lHandIK;
                 parent.RHandIKCurrent = rHandIK;
 
@@ -197,9 +199,7 @@ namespace MoveStyler.Patches
         [HarmonyPriority(701)] //Manually Setting a Higher Priority to fix issues with null inputs
         public static void Prefix(Player __instance, ref string trickName, int trickNum = 0, Player.TrickType type = Player.TrickType.NONE)
         {
-            DebugLog.LogMessage("****************Patching Do Trick*****************");
-
-
+            //DebugLog.LogMessage("****************Patching Do Trick*****************");
             if (trickName == null)
             {
                 trickName = "";

@@ -20,7 +20,7 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref CharacterVisual __instance)
         {
-            DebugLog.LogMessage("***************  Patch Init MovestyleProps  ****************");
+            //DebugLog.LogMessage("***************  Patch Init MovestyleProps  ****************");
 
             //Create a base object to reference all movestyles
             CustomMoveStyleVisualParent parent = __instance.gameObject.AddComponent<CustomMoveStyleVisualParent>();
@@ -52,7 +52,7 @@ namespace MoveStyler.Patches
                 //Store Custom Movestyle in CustomMoveStyleVisualParent
                 parent.CustomMoveStylesList.Add(new KeyValuePair<MoveStyle, CustomMoveStyleVisual>(style, moveStyleVisual));
 
-                DebugLog.LogMessage("Created new movestylePropObject ");
+                //DebugLog.LogMessage("Created new movestylePropObject ");
             }
 
             parent.SetupPropVisuals(__instance);
