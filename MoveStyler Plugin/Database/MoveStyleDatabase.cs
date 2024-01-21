@@ -117,7 +117,7 @@ namespace MoveStyler
                         DebugLog.LogMessage("Found MovestyleDefinition");
                         string fileName = Path.GetFileName(filePath);
                         
-                        /** Reimplement Json at somepoint **/
+                        /** Animation Config Json Loading **/
                         string potentialConfigPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + ".json");
                         if (File.Exists(potentialConfigPath))
                         {
@@ -171,6 +171,8 @@ namespace MoveStyler
                             }
                         }
 
+                        /** Loading Custom SFX **/
+
                         StringBuilder characterLog = new StringBuilder();
                         characterLog.Append($"Loading \"{moveStyleDefinition.Movestylename}\"");
 
@@ -183,7 +185,7 @@ namespace MoveStyler
 
                             if (_moveStyleBundlePaths.ContainsKey(id))
                             {
-                                DebugLog.LogWarning($"Movestyle GUID already exists. Make sure to not have duplicate character bundles.");
+                                DebugLog.LogWarning($"Movestyle GUID already exists. Make sure to not have duplicate movestyle bundles.");
                                 return false;
                             }
 
@@ -193,11 +195,10 @@ namespace MoveStyler
 
                             SfxCollectionID sfxID = SfxCollectionID.NONE;
                             
-                            
                             NewCharacterCount++;
 
                             MoveStyle newMoveStyleEnum = MoveStyle.MAX + NewCharacterCount;
-                            sfxID = SfxCollectionID.MAX + NewCharacterCount;
+                            sfxID = VoiceUtility.GetMovestyleSFXCollectionID(newMoveStyleEnum); //Using the 100's to try stop interferance with CrewBoom
 
                             if (_moveStyleIds.ContainsKey(newMoveStyleEnum))
                             {
@@ -215,6 +216,7 @@ namespace MoveStyler
                             //Create a new custom character instance and store it
                             CustomMoveStyle customMoveStyle = new CustomMoveStyle(moveStyleDefinition, sfxID, (int)newMoveStyleEnum);
                             _customMoveStyle.Add(id, customMoveStyle);
+
                         }
                         else
                         {
@@ -352,6 +354,19 @@ namespace MoveStyler
             return true;
         }
 
+        public static SfxCollectionID GetCustomMovestyleSFXID(MoveStyle moveStyle)
+        {
+            CustomMoveStyle characterObject = null;
+
+            if (GetFirstOrConfigMoveStyleId(moveStyle, out Guid guid))
+            {
+                GetCharacter(guid, out characterObject);
+                return characterObject.SfxID;
+            }
+
+            return (SfxCollectionID)0;
+        }
+
         public static bool GetCharacter(Guid id, out CustomMoveStyle characterObject)
         {
             if (!_customMoveStyle.TryGetValue(id, out characterObject))
@@ -481,7 +496,6 @@ namespace MoveStyler
             Characters playerChar = (Characters)player.GetField("character").GetValue(player);
             instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = moveStyle;
         }
-
 
         private static void getConfigFadeInfo(CustomAnimInfo Info, String Json)
         {

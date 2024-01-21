@@ -23,11 +23,11 @@ namespace MoveStyler.Patches
             MoveStyle style =  (MoveStyle)__instance.p.GetField("moveStyle").GetValue(__instance.p);
             if (style > MoveStyle.MAX)
             {
-                DebugLog.LogMessage("AbilitySwitch is Custom");
+                //DebugLog.LogMessage("AbilitySwitch is Custom");
                 //return false;
             }
 
-            DebugLog.LogMessage("AbilitySwitch is Default");
+            //DebugLog.LogMessage("AbilitySwitch is Default");
             return true;
             
         }

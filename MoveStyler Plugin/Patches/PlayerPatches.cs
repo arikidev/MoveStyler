@@ -8,6 +8,7 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
+using MoveStyler;
 
 using MoveStyler.Data;
 
