@@ -15,8 +15,8 @@ namespace MoveStyler.Patches
             Texture2D texture = TextureUtil.GetTextureFromBitmap(Properties.Resources.logo_background);
 
             int padding = 15;
-            int MaxWidth = (int)(Screen.width * 0.6f - padding);
-            int MaxHeight = (int)(Screen.height * 0.45f - padding);
+            int MaxWidth = (int)(Screen.width * 0.5f - padding);
+            int MaxHeight = (int)(Screen.height * 0.35f - padding);
 
             GameObject logo = new GameObject("MoveStyler Logo");
             logo.transform.SetParent(__instance.transform, false);

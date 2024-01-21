@@ -494,6 +494,8 @@ namespace MoveStyler
 
             Core instance = Core.Instance;
             Characters playerChar = (Characters)player.GetField("character").GetValue(player);
+            if (moveStyle > MoveStyle.MAX)
+            { moveStyle = MoveStyle.BMX; }  //A fall back to unbreak saves until new save scheme is implemented
             instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = moveStyle;
         }
 
