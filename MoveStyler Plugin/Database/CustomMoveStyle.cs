@@ -1514,43 +1514,30 @@ namespace MoveStyler.Data
 			SfxCollection newCollection = ScriptableObject.CreateInstance<SfxCollection>();
 
 			newCollection.collectionName = VoiceUtility.GetMovestyleSFXCollectionNameFromStyleName(this.name);
-			DebugLog.LogMessage($"***********************   Collection Name {newCollection.collectionName}");
 
 			int sfxLength = Definition.CustomAudioClips.Length + 6 + 1; //Adding the amount of base Clips +1 for id Clip
-
-			DebugLog.LogMessage($"SFX Length: {sfxLength}");
 
 			//Create an Ordered List combining random clips together
 			Dictionary<int, List<AudioClip>> OrderSFXLists = new Dictionary<int, List<AudioClip>>();
 			int i = 0;
 			foreach (int id in Definition.AudioClipID)
 			{
-				DebugLog.LogMessage($"ID: {id}");
 				if (OrderSFXLists.ContainsKey(id))
 				{
 					OrderSFXLists[id].Add(Definition.CustomAudioClips[i]);
 				}
 				else 
 				{
-					DebugLog.LogMessage($"Trying to add new list, index: {i}");
+					//DebugLog.LogMessage($"Trying to add new list, index: {i}");
 					List < AudioClip >  list = new List<AudioClip>();
 					list.Add(Definition.CustomAudioClips[i]);
 					OrderSFXLists.Add(id, list);
 				}
 				i++;
 			}
-			DebugLog.LogMessage("Create Audio Container");
-			newCollection.audioClipContainers = new SfxCollection.RandomAudioClipContainer[sfxLength];
 			
-			/* Old
-			for (int i = 0; i < OrderSFXLists.Count ; i++)
-			{
-				newCollection.audioClipContainers[i] = new SfxCollection.RandomAudioClipContainer();
-				newCollection.audioClipContainers[i].clipID = (AudioClipID)Definition.AudioClipID[i]; //This is override the enumValues
-				newCollection.audioClipContainers[i].clips = null;
-				newCollection.audioClipContainers[i].lastRandomClip = 0;
-			}
-			*/
+			newCollection.audioClipContainers = new SfxCollection.RandomAudioClipContainer[sfxLength];
+	
 
 			// Fill newCollection with OrderList
 			int index = 0;
@@ -1563,7 +1550,6 @@ namespace MoveStyler.Data
 
 				index++;
 			}
-			DebugLog.LogMessage("Created Order List");
 
 			List<AudioClip[]> BaseClips = new List<AudioClip[] >();
 			BaseClips.Add(Definition.Jump);
@@ -1601,16 +1587,14 @@ namespace MoveStyler.Data
 			//BaseClipsIDS.Add(7777);		//Definition.AirTrick3);
 			BaseClipsIDS.Add(389);      //Definition.HandPlant);
 
-			DebugLog.LogMessage("Created Base SFX List");
-
 			int ind = 0;
 			foreach (AudioClip[] clips in BaseClips)
 			{
-				DebugLog.LogMessage($"Add Base SFX | {BaseClipsIDS[ind]} , to index {index} ");
+				
 				newCollection.audioClipContainers[index] = new SfxCollection.RandomAudioClipContainer();
 				newCollection.audioClipContainers[index].clipID = (AudioClipID)BaseClipsIDS[ind] ; //This is override the enumValues
-				if (clips.Length > 0) { newCollection.audioClipContainers[index].clips = clips; DebugLog.LogMessage($"Added Clip: {clips[0]} "); } // This is to allow for the GetClip function to fail safely.
-				else { DebugLog.LogMessage($"Failed to find clip "); }
+				if (clips.Length > 0) { newCollection.audioClipContainers[index].clips = clips; DebugLog.LogDebug($"Added Clip: {clips[0]} "); } // This is to allow for the GetClip function to fail safely.
+				else { DebugLog.LogWarning($"Failed to find clip "); }
 				newCollection.audioClipContainers[index].lastRandomClip = 0;
 
 				index++;
@@ -1638,126 +1622,9 @@ namespace MoveStyler.Data
 				}
 			}
 
-			DebugLog.LogMessage("Try Set SFX");
+			
 			Sfx = newCollection;
 
-			/*
-			DebugLog.LogMessage("Try get audioManager");
-			AudioManager audioManager = Core.Instance.AudioManager;
-			if (audioManager == null){ DebugLog.LogMessage("Failed to find Audio Manager"); return; }
-			SfxLibrary sfxLibrary = (SfxLibrary)audioManager.GetField("sfxLibrary").GetValue(audioManager);
-			if (sfxLibrary == null) { DebugLog.LogMessage("Failed to get sfxLibrary"); return; }
-			VoiceUtility.AddNewMovestyleSFXCollection(sfxLibrary, Sfx, VoiceUtility.GetMovestyleSFXCollectionID((MoveStyle)this.Index), this.name);
-			*/
-
 		}
-		/*
-		private void CreateSfxCollection()
-		{
-			if (!Definition.HasVoices())
-			{
-				return;
-			}
-
-			SfxCollection newCollection = ScriptableObject.CreateInstance<SfxCollection>();
-
-			newCollection.audioClipContainers = new SfxCollection.RandomAudioClipContainer[VOICE_IDS.Count];
-			for (int i = 0; i < VOICE_IDS.Count; i++)
-			{
-				newCollection.audioClipContainers[i] = new SfxCollection.RandomAudioClipContainer();
-				newCollection.audioClipContainers[i].clipID = VOICE_IDS[i];
-				newCollection.audioClipContainers[i].clips = null;
-				newCollection.audioClipContainers[i].lastRandomClip = 0;
-			}
-
-			foreach (SfxCollection.RandomAudioClipContainer originalContainer in newCollection.audioClipContainers)
-			{
-				switch (originalContainer.clipID)
-				{
-					case AudioClipID.VoiceDie:
-						if (Definition.VoiceDie.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceDie;
-						}
-						break;
-					case AudioClipID.VoiceDieFall:
-						if (Definition.VoiceDieFall.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceDieFall;
-						}
-						break;
-					case AudioClipID.VoiceTalk:
-						if (Definition.VoiceTalk.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceTalk;
-						}
-						break;
-					case AudioClipID.VoiceBoostTrick:
-						if (Definition.VoiceBoostTrick.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceBoostTrick;
-						}
-						break;
-					case AudioClipID.VoiceCombo:
-						if (Definition.VoiceCombo.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceCombo;
-						}
-						break;
-					case AudioClipID.VoiceGetHit:
-						if (Definition.VoiceGetHit.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceGetHit;
-						}
-						break;
-					case AudioClipID.VoiceJump:
-						if (Definition.VoiceJump.Length > 0)
-						{
-							originalContainer.clips = Definition.VoiceJump;
-						}
-						break;
-				}
-			}
-
-			Sfx = newCollection;
-		}
-
-		public void ApplySfxCollection(SfxCollection collection)
-		{
-			if (Sfx == null)
-			{
-				Sfx = collection;
-				return;
-			}
-			else
-			{
-				foreach (SfxCollection.RandomAudioClipContainer container in collection.audioClipContainers)
-				{
-					//Add any missing entries
-					if (!VOICE_IDS.Contains(container.clipID))
-					{
-						Array.Resize(ref Sfx.audioClipContainers, Sfx.audioClipContainers.Length + 1);
-						Sfx.audioClipContainers[Sfx.audioClipContainers.Length - 1] = container;
-					}
-				}
-			}
-		}
-		public void ApplyShaderToOutfits(Shader shader)
-		{
-			foreach (CharacterOutfit outfit in Definition.Outfits)
-			{
-				foreach (CharacterOutfitRenderer container in outfit.MaterialContainers)
-				{
-					for (int i = 0; i < container.Materials.Length; i++)
-					{
-						if (container.UseShaderForMaterial[i])
-						{
-							container.Materials[i].shader = shader;
-						}
-					}
-				}
-			}
-		}
-		*/
 	}
 }

@@ -46,7 +46,7 @@ namespace MoveStyler.Patches
                 
                 CustomMoveStyle style; moveStyleDatabase.GetCharacter(moveStyle, out style);
                 moveStyle = (MoveStyle)((int)style.SfxID - (int)SfxCollectionID.MoveStyle_0_Default );
-                DebugLog.LogMessage($"movestyle SFXID:  {(int)style.SfxID} {(int)moveStyle} , id = {audioClipId}");
+                //DebugLog.LogMessage($"movestyle SFXID:  {(int)style.SfxID} {(int)moveStyle} , id = {audioClipId}");
 
                 //AudioClip audioClipFromCollection = VoiceUtility.GetRandomClipFromIdCustomSFX(audioClipId, style.Sfx); //_instance.sfxLibrary.GetAudioClipFromCollection(SfxCollectionID.MoveStyle_0_Default + (int)moveStyle, audioClipId);
 
@@ -88,11 +88,11 @@ namespace MoveStyler.Patches
 
             if (moveStyle > MoveStyle.MAX)
             {
-                DebugLog.LogMessage($"Trying to Find Custom SFX of id {(int)audioClipId}");
+                //DebugLog.LogMessage($"Trying to Find Custom SFX of id {(int)audioClipId}");
 
                 //Get the correct SFXID
                 SfxCollectionID id = VoiceUtility.GetMovestyleSFXCollectionID(moveStyle);
-                DebugLog.LogMessage($" Get SFX Collection id from Movestyle: {moveStyle} | ID: {id}");
+                //DebugLog.LogMessage($" Get SFX Collection id from Movestyle: {moveStyle} | ID: {id}");
 
                 __instance.InvokeMethod("PlaySfxGameplay",
                         new Type[] { typeof(SfxCollectionID), typeof(AudioClipID), typeof(AudioSource), typeof(float) },
@@ -225,7 +225,7 @@ namespace MoveStyler.Patches
 
             if (isCustomMovestyle)
             {
-                DebugLog.LogMessage("Found Custom Movestyle SFX Request. Patching...");
+                //DebugLog.LogMessage("Found Custom Movestyle SFX Request. Patching...");
 
                 __result = VoiceUtility.GetAudioClipContainerFromIDCustom(ref audioClipContainers, clipID);
                 return false;

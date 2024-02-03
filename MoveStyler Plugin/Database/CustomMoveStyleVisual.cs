@@ -19,9 +19,14 @@ namespace MoveStyler.Data
         public bool LHandIKCurrent = false;
         public bool RHandIKCurrent = false;
 
+        private Player player;
+        private CharacterVisual characterVisual;
+
         public CustomMoveStyleVisualParent()
         {
-            CustomMoveStylesList = new List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>>();
+            this.CustomMoveStylesList = new List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>>();
+            this.player = base.transform.parent.parent.GetComponentInParent<Player>();  
+            this.characterVisual = base.transform.parent.GetComponentInParent<CharacterVisual>();
         }
 
         public void SetCustomMoveStyleVisualsPropMode(Player player, MoveStyle setMoveStyle, bool forceOff = false)
@@ -40,17 +45,17 @@ namespace MoveStyler.Data
                 if ((int)styleEquipt == (int)prop.Key && ToOnfoot) // If currently equipt and going to on foot
                 {
                     mode = CharacterVisual.MoveStylePropMode.ON_BACK;
-                    prop.Value.SetPropsActive(false);
+                    prop.Value.SetPropsActive(false, characterVisual);
                 }
                 else if (setMoveStyle == prop.Key)
                 {
                     mode = CharacterVisual.MoveStylePropMode.ACTIVE;
-                    prop.Value.SetPropsActive(true);
+                    prop.Value.SetPropsActive(true , characterVisual);
                 }
                 else
                 {
                     mode = CharacterVisual.MoveStylePropMode.OFF;
-                    prop.Value.SetPropsActive(false);
+                    prop.Value.SetPropsActive(false, characterVisual);
                 }
             }
         }
@@ -65,6 +70,19 @@ namespace MoveStyler.Data
                 foreach (KeyValuePair<string, GameObject> prop in style.Value.Props)
                 {
                     Transform bone = characterVisualTransform.FindRecursive(prop.Key);
+                    
+                    //Fix for Crewboom skateOffset
+                    Transform offetR = bone.FindChild("skateOffsetR");
+                    Transform offetL = bone.FindChild("skateOffsetL");
+                    if (offetR !=null)
+                    {
+                        bone = offetR;
+                    }
+                    if (offetL != null)
+                    {
+                        bone = offetL;
+                    }
+
                     prop.Value.transform.SetParent(bone, false);
                     prop.Value.transform.SetToIdentity();
                     prop.Value.SetActive(true);
@@ -74,10 +92,71 @@ namespace MoveStyler.Data
 
         static public CustomMoveStyleVisualParent GetCustomMoveStyleVisualParent(CharacterVisual Char)   
         {
-            CustomMoveStyleVisualParent parent = Char.GetComponentInChildren<CustomMoveStyleVisualParent>();
+            CustomMoveStyleVisualParent parent = Char.anim.GetComponentInChildren<CustomMoveStyleVisualParent>();
 
             return parent;
         }
+
+        //Custom Animation Events handelers
+
+        public void MSAnimEvent(AnimationEvent animationEvent)
+        {
+            DebugLog.LogMessage($"Triggering AnimEvent : {animationEvent.stringParameter}");
+
+            string[] strings = animationEvent.stringParameter.Split('.');
+
+            switch (strings[0])
+            {
+                case "layer":
+                    if (strings.Length > 2)
+                    {
+                        int ind = -1; ind = characterVisual.anim.GetLayerIndex(strings[1]);
+                        float weight = -1; weight =  float.Parse(strings[2]);
+
+                        if (ind > 0 && weight!= -1)
+                        { 
+                            characterVisual.anim.SetLayerWeight(ind, weight);
+                            DebugLog.LogMessage($"set layer weight : {strings[1]} = {weight} ");
+                        }
+                    }
+
+                    break;
+
+                case "parameter":
+                    if (strings.Length > 3)
+                    {
+                        float weight = -1; weight = float.Parse(strings[3]);
+
+                        if (strings[1] == "int")
+                        {
+                            if (weight != -1)
+                            {
+                                characterVisual.anim.SetInteger(strings[2], (int)weight);
+                                DebugLog.LogMessage($"set parameter int : {strings[2]} = {characterVisual.anim.GetInteger(strings[2])} ");
+                            }
+                        }
+                        else if (strings[1] == "float")
+                        {
+                            if (weight != -1)
+                            {
+                                characterVisual.anim.SetFloat(strings[2], weight);
+                                DebugLog.LogMessage($"set parameter float : {strings[2]} = {weight} ");
+                            }
+                        }
+                    }
+
+                    break;
+
+                default:
+
+                    DebugLog.LogMessage($"AnimEvent : *{strings[0]}* not found");
+
+                    break;          
+            }
+
+            return;
+        }
+
     }
 
     public class CustomMoveStyleVisual
@@ -110,13 +189,34 @@ namespace MoveStyler.Data
             _Props.Add(new KeyValuePair<string, GameObject>(attachment, obj));
         }
 
-        public void SetPropsActive(bool active)
+        public void SetPropsActive(bool active, CharacterVisual visual)
         {
+
+            Transform characterVisualTransform = visual.gameObject.transform;
+
             foreach (KeyValuePair<string, GameObject> Prop in _Props)
             {
-                Prop.Value.SetActive(active);   
+                Prop.Value.SetActive(active);
+                if (active == true)
+                { 
+                    Transform bone = characterVisualTransform.FindRecursive(Prop.Key);
+
+                    //Fix for Crewboom skateOffset
+                    Transform offetR = bone.FindChild("skateOffsetR");
+                    Transform offetL = bone.FindChild("skateOffsetL");
+                    if (offetR != null)
+                    {
+                        bone = offetR;
+                    }
+                    if (offetL != null)
+                    {
+                        bone = offetL;
+                    }
+
+                    Prop.Value.transform.SetParent(bone, false);
+                    Prop.Value.transform.SetToIdentity();
+                }
             }     
         }
-
     }
 }

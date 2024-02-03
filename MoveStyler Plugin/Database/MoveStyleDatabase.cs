@@ -6,7 +6,6 @@ using System;
 using BepInEx.Logging;
 using BepInEx;
 using System.Text;
-using CrewBoomAPI;
 using System.Linq;
 using UnityEngine.TextCore.Text;
 using MoveStyler.Data;
@@ -18,7 +17,6 @@ namespace MoveStyler
     {
         private static readonly string ASSET_PATH = Path.Combine(Paths.ConfigPath, PluginInfo.PLUGIN_NAME);
         //private static readonly string NO_CYPHER_PATH = Path.Combine(ASSET_PATH, "no_cypher");
-
         public static int NewCharacterCount { get; private set; } = 0;
 
         private static Dictionary<Guid, string> _moveStyleBundlePaths;
@@ -251,6 +249,7 @@ namespace MoveStyler
 
         private static void InitializeAPI()
         {
+            /*
             Dictionary<int, Guid> userCharacters = new Dictionary<int, Guid>();
 
             int max = (int)MoveStyle.MAX;
@@ -263,6 +262,7 @@ namespace MoveStyler
             }
 
             CrewBoomAPIDatabase.Initialize(userCharacters);
+            */
         }
 
         public static void InitializeMissingSfxCollections(MoveStyle character, SfxCollection collection)

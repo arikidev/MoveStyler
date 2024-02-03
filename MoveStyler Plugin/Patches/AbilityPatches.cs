@@ -26,17 +26,18 @@ namespace MoveStyler.Patches
             __result = __result || moveStyle > MoveStyle.MAX;
         }
 
+        /*
         [HarmonyPrefix]
         [HarmonyPatch("SetSlideState")]
         static void SetSlideStatePatch(SlideAbility.SlideState setState)
         {
-            DebugLog.LogMessage($"{setState}");
+            //DebugLog.LogMessage($"{setState}");
 
 
         
         
         }
-
+        */
 
     }
 }

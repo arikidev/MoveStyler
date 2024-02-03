@@ -22,8 +22,8 @@ namespace MoveStyler.Patches
         {
             //DebugLog.LogMessage("***************  Patch Init MovestyleProps  ****************");
 
-            //Create a base object to reference all movestyles
-            CustomMoveStyleVisualParent parent = __instance.gameObject.AddComponent<CustomMoveStyleVisualParent>();
+            //Create a base object to reference all movestyles. Attach it to the AnimObject to allow for anim relay events
+            CustomMoveStyleVisualParent parent = __instance.anim.gameObject.AddComponent<CustomMoveStyleVisualParent>();
             if (parent == null) { DebugLog.LogMessage("CustomMoveSyleVisuals is null "); return; }
 
             for (int index = 1; index <= moveStyleDatabase.NewCharacterCount; index++)
@@ -48,6 +48,8 @@ namespace MoveStyler.Patches
 
                     moveStyleVisual.AddPropObject(newObj, prop.Value);
                 }
+                //Todo add ability to scale props
+
 
                 //Store Custom Movestyle in CustomMoveStyleVisualParent
                 parent.CustomMoveStylesList.Add(new KeyValuePair<MoveStyle, CustomMoveStyleVisual>(style, moveStyleVisual));
@@ -72,7 +74,7 @@ namespace MoveStyler.Patches
                 //Get #CustomMoveStyles
                 MoveStyle equippedStyle = (MoveStyle)player.GetField("moveStyleEquipped").GetValue(player);
 
-                CustomMoveStyleVisualParent MovestyleVisualParent = __instance.GetComponent<CustomMoveStyleVisualParent>();
+                CustomMoveStyleVisualParent MovestyleVisualParent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
                 if (MovestyleVisualParent == null) { DebugLog.LogMessage("PropList is Null"); return; };
                 MovestyleVisualParent.SetCustomMoveStyleVisualsPropMode(player, setMoveStyle, forceOff);
 
@@ -132,7 +134,10 @@ namespace MoveStyler.Patches
 
                     CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
 
-                    bool setIK = set || parent.RHandIKCurrent;
+                    bool setIK = false;
+
+                    if (set) { setIK = false; }
+                    else { setIK = parent.RHandIKCurrent; }
 
                     //Set use handIK
                     __instance.GetField("handIKActiveR").SetValue(__instance, setIK);
@@ -161,7 +166,11 @@ namespace MoveStyler.Patches
                 {
                     CustomMoveStyleVisualParent parent = CustomMoveStyleVisualParent.GetCustomMoveStyleVisualParent(__instance);
 
-                    bool setIK = set || parent.LHandIKCurrent;
+                    bool setIK = false;
+
+                    if (set) { setIK = false; }
+                    else { setIK = parent.LHandIKCurrent; }
+
 
                     //Set use handIK
                     __instance.GetField("handIKActiveL").SetValue(__instance, setIK);

@@ -167,7 +167,7 @@ namespace MoveStyler
 
         public static void AddNewMovestyleSFXCollection(SfxLibrary sfxLibrary, SfxCollection collection, SfxCollectionID sfxCollectionID, string name)
         {
-            DebugLog.LogMessage($"Adding new Movestyle SFX Collection | id : {sfxCollectionID}");
+            //DebugLog.LogMessage($"Adding new Movestyle SFX Collection | id : {sfxCollectionID}");
 
             if (sfxLibrary.sfxCollectionIDDictionary.ContainsKey(sfxCollectionID))
             {
@@ -175,7 +175,7 @@ namespace MoveStyler
                 return;
             }
 
-            DebugLog.LogMessage($"Adding new Movestyle SFX Collection to sfxLibrary Dictionaries");
+            //DebugLog.LogMessage($"Adding new Movestyle SFX Collection to sfxLibrary Dictionaries");
             sfxLibrary.sfxCollectionIDDictionary.Add(sfxCollectionID, collection);
             sfxLibrary.sfxCollectionDictionary.Add(GetMovestyleSFXCollectionNameFromStyleName(name), collection);
             
@@ -207,12 +207,12 @@ namespace MoveStyler
 
         public static void PlayLoopingSFX(AudioMixerGroup audioMixerGroup, AudioClip audioClip, AudioSource audioSource, float randomPitchVariance, float delayedSeconds)
         {
-            DebugLog.LogMessage("PlayLoopingSFX Voic Utility");
+            //DebugLog.LogMessage("PlayLoopingSFX Voic Utility");
 
 
             if (audioClip == null)
             {
-                DebugLog.LogMessage("clip null");
+                DebugLog.LogWarning($"clip {audioClip} was null");
                 return;
             }
             if (randomPitchVariance > 0f)
@@ -228,7 +228,7 @@ namespace MoveStyler
                 audioSource.PlayDelayed(delayedSeconds);
                 return;
             }
-            DebugLog.LogMessage($"playing audio {audioSource.clip}, {audioSource.outputAudioMixerGroup}");
+            //DebugLog.LogMessage($"playing audio {audioSource.clip}, {audioSource.outputAudioMixerGroup}");
 
             audioSource.Play();
         }

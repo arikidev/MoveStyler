@@ -31,9 +31,6 @@
 	<Reference Include="Unity.TextMeshPro">
 		<HintPath>Libraries/Unity.TextMeshPro.dll</HintPath>
 	</Reference>
-	<Reference Include="CrewBoomAPI">
-		<HintPath>Libraries/CrewBoomAPI.dll</HintPath>
-	</Reference>
 	<Reference Include="MoveStylerMono">
 		<HintPath>Libraries/MoveStylerMono.dll</HintPath>
 	</Reference>
