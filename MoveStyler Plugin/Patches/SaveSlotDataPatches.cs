@@ -2,65 +2,43 @@
 using Reptile;
 using System;
 using System.IO;
+using BepInEx.Logging;
 
 namespace MoveStyler.Patches
 {
-    [HarmonyPatch(typeof(Reptile.CharacterProgress), nameof(Reptile.CharacterProgress.Write))]
-    public class CharacterProgressPatch
-    {
-        public static bool Prefix( ref CharacterProgress __instance)
-        {
-            MoveStyle movestyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
-
-            if (movestyle > MoveStyle.MAX)
-            {
-                __instance.GetField("moveStyle").SetValue(__instance, MoveStyle.BMX);
-            }
-
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(Reptile.CharacterProgress), nameof(Reptile.CharacterProgress.Read))]
-    public class CharacterProgressReadPatch
-    {
-        public static void Postfix( ref CharacterProgress __instance)
-        {
-            MoveStyle movestyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
-
-            if (movestyle > MoveStyle.MAX)
-            {
-                __instance.GetField("moveStyle").SetValue(__instance, MoveStyle.BMX);
-            }
-        }
-    }
-
-    /* 
     [HarmonyPatch(typeof(Reptile.SaveSlotData), nameof(Reptile.SaveSlotData.GetCharacterProgress))]
     public class SaveSlotGetProgressPatch
     {
-        public static bool Prefix(Characters character, ref CharacterProgress __result)
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} SaveSlotGetProgressPatch");
+
+        [HarmonyPriority(900)]
+        public static void Postfix(Characters character, ref CharacterProgress __result)
         {
             
+            CharacterProgress baseProgress = __result;
 
+            Guid characterGuid;
 
-            if (character != null)
+            if (CharUtil.GetGuidForCharacters(character, out characterGuid))
             {
-                if (CharacterSaveSlots.GetCharacterData(character, out CharacterProgress data))
-                    {
-                        __result = data;
-                    }
-                
-                
-                if (moveStyleDatabase.GetFirstOrConfigMoveStyleId(character, out Guid guid))
+                if (CharacterSaveSlots.GetCharacterData(characterGuid, out CharacterProgress data))
                 {
-                    
-                }
-                return false;
+                    if (data == null) { DebugLog.LogMessage("data was null"); return; }
+
+                    if (moveStyleDatabase.HasMovestyle(data.moveStyle) || data.moveStyle < MoveStyle.MAX)
+                    {
+
+                        if (baseProgress != null)
+                        {
+                            data.unlocked = baseProgress.unlocked;
+                            data.version = baseProgress.version;
+                        }
+                        __result = data;
+                        return;
+                    }  
+                } 
             }
-            return true;
+            return;
         }
     }
-   */
-
 }

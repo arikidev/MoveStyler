@@ -3,6 +3,8 @@ using Reptile;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using MoveStyler.Data;
+using CrewBoomAPI;
 
 namespace MoveStyler
 {
@@ -21,11 +23,15 @@ namespace MoveStyler
 
         public static void LoadSlot(int slot)
         {
+            DebugLog.LogMessage("Load Slot");
+            
             if (!Directory.Exists(SAVE_PATH))
             {
                 Directory.CreateDirectory(SAVE_PATH);
                 return;
             }
+
+            DebugLog.LogMessage("Found Dir");
 
             string slotPath = Path.Combine(SAVE_PATH, slot.ToString() + SLOT_FILE_EXTENSION);
             if (File.Exists(slotPath))
@@ -49,6 +55,7 @@ namespace MoveStyler
             }
 
             CurrentSaveSlotId = slot;
+            DebugLog.LogMessage($"Custom Save slot ID {slot}");
         }
         public static void SaveSlot()
         {
@@ -105,20 +112,15 @@ namespace MoveStyler
             string characterFilePath = CharacterFilePath(slotPath, guid);
             if (!File.Exists(characterFilePath))
             {
-                /*
-                if (CharacterDatabase.GetCharacter(guid, out CustomCharacter customCharacter))
-                {
+
                     progress = new()
                     {
                         outfit = 0,
-                        moveStyle = (MoveStyle)customCharacter.Definition.DefaultMovestyle,
+                        moveStyle = MoveStyle.ON_FOOT,
                         moveStyleSkin = 0
                     };
                     _progressLookup.Add(guid, progress);
                     return true;
-                }
-                */
-                return false;
             }
 
             try
@@ -172,6 +174,7 @@ namespace MoveStyler
             {
                 DebugLog.LogError($"Could not write character save data for character with GUID \"{guid}\".");
             }
+
         }
 
         private static bool EnsureSlotDirectory(out string slotPath)

@@ -14,21 +14,20 @@ using MoveStyler.Data;
 
 namespace MoveStyler.Patches
 {
-    
+
+
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
+    [HarmonyBefore("sgiygas.crewBoom")]
     public class PlayerSetCurrentMoveStyleEquippedPatch
     {
-        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME}Player Patches");
 
-        public static bool Prefix(ref MoveStyle setMoveStyleEquipped, bool changeProp, bool changeAnim)
+        public static void Postfix(ref MoveStyle setMoveStyleEquipped)
         {
+            //Clean output to prevent CrewBoom from saving a customMovestyles
             if (setMoveStyleEquipped > MoveStyle.MAX)
             {
-                //DebugLog.LogMessage("Set Movestyle Equipt is custom");
-                return true;
+                setMoveStyleEquipped = MoveStyle.ON_FOOT;
             }
-
-            return true;
         }
     }
 
@@ -39,11 +38,9 @@ namespace MoveStyler.Patches
 
         public static bool Prefix(ref Player __instance, MoveStyle setMoveStyle, bool changeProp, bool changeAnim, GameObject specialSkateboard = null)
         {
-            //DebugLog.LogMessage("Patching SetMoveStyle:");
 
             if (setMoveStyle > MoveStyle.MAX)
             {
-                //DebugLog.LogMessage("setMovestyle is custom");
 
                 CharacterVisual characterVisual = (CharacterVisual)__instance.GetField("characterVisual").GetValue(__instance);
 
@@ -56,7 +53,6 @@ namespace MoveStyler.Patches
                     {
                         int newAnim = curAnim;
                         __instance.GetField("curAnim").SetValue(__instance, 0);
-                        //__instance.curAnim = 0; Above line to set fields
                         __instance.PlayAnim(newAnim, false, false, -1f);
                     }
                 }
@@ -67,7 +63,6 @@ namespace MoveStyler.Patches
                 //Apply Visual Change to CustomMoveStyle
                 if (changeProp)
                 {
-                    //DebugLog.LogMessage("Updating Visual");
                     characterVisual.SetMoveStyleVisualProps(__instance, setMoveStyle, false);
                 }
 
@@ -79,7 +74,6 @@ namespace MoveStyler.Patches
 
                 return false; // Skip is Enum is Custom
             }
-            //DebugLog.LogMessage("SetMovestyle is default style");
 
             return true;
         }
@@ -92,7 +86,6 @@ namespace MoveStyler.Patches
 
         public static void Postfix(ref Player __instance)
         {
-            //DebugLog.LogMessage("Start Init Animation Patch");
 
             MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
 
@@ -129,7 +122,6 @@ namespace MoveStyler.Patches
         }
     }
 
-
     // Update Animation Patch to send through Player Speed to the Animator
     [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")]
     public class PlayerUpdateAnimPatch
@@ -143,9 +135,6 @@ namespace MoveStyler.Patches
             Animator anim = charVis.anim;
 
             charVis.anim.SetFloat("forwardSpeed", speed);
-
-            //DebugLog.LogMessage($"forwardSpeed : {speed}");
-            //DebugLog.LogMessage($"forwardSpeedGet : {charVis.anim.GetFloat("forwardSpeed")}");
 
         }
 
@@ -185,8 +174,6 @@ namespace MoveStyler.Patches
 
                 parent.LHandIKCurrent = lHandIK;
                 parent.RHandIKCurrent = rHandIK;
-
-                //DebugLog.LogMessage($" PlayAnimtion: {newAnim} ik: {lHandIK} | {rHandIK} ");
             }
         }
     }
@@ -207,43 +194,6 @@ namespace MoveStyler.Patches
             }
         }
     }
-
-    /** Removed Because its no longer needed
-    [HarmonyPatch(typeof(Reptile.Player), "PlayAnim")]
-    public class PlayerPlayAnimPatch
-    {
-        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
-
-        public static bool Prefix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
-        {
-            return true; //Testing reEnabling normal anims
-        }
-    }
-    */
-
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), "UpdateAnim")] //Reflection? idk what this does
-    public class PlayerUpdateAnimPatch
-    {
-        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
-
-        public static bool Prefix(ref Player __instance)
-        {
-            return true; //Testing reEnabling normal anims
-
-            MoveStyle equippedStyle = (MoveStyle)__instance.GetField("moveStyleEquipped").GetValue(__instance);
-
-            // Process Custom Movestyles
-            if (equippedStyle > MoveStyle.MAX)
-            {
-                //DebugLog.LogMessage("Custom Update Anim");
-                return false;
-            }
-
-            return true;
-        }
-    }
-    */
 
     /*
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCharacter))]
@@ -286,139 +236,90 @@ namespace MoveStyler.Patches
     }
     */
 
-    /*
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetOutfit))]
-    public class PlayerSetOutfitPatch
-    {
-        public static bool Prefix(int setOutfit, Player __instance, CharacterVisual ___characterVisual, Characters ___character)
-        {
-            if (!CharacterDatabase.HasCharacter(___character))
-            {
-                return true;
-            }
-
-            bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
-            if (!isAi)
-            {
-                Core.Instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(___character).outfit = setOutfit;
-
-                if (___character > Characters.MAX)
-                {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(___character, out Guid guid))
-                    {
-                        CharacterSaveSlots.SaveCharacterData(guid);
-                    }
-                }
-            }
-
-            if (CharUtil.TrySetCustomOutfit(___characterVisual, setOutfit, out SkinnedMeshRenderer firstActiveRenderer))
-            {
-                ___characterVisual.mainRenderer = firstActiveRenderer;
-            }
-
-            return false;
-        }
-    }
-    */
-
-    /* To Do switch to a system that request movestyle switching by name
+    //To Do switch to a system that request movestyle switching by name
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
     public class PlayerSetMovestyleEquipped
     {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
+
         public static void Postfix(Player __instance, MoveStyle setMoveStyleEquipped)
         {
             bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
             if (!isAi)
             {
                 Characters character = (Characters) __instance.GetField("character").GetValue(__instance);
-                if (character > Characters.MAX)
+                if (CharUtil.GetGuidForCharacters(character, out Guid guid))
                 {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(character, out Guid guid))
+                    if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress))
                     {
-                        if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress))
-                        {
-                            progress.moveStyle = setMoveStyleEquipped;
-                            CharacterSaveSlots.SaveCharacterData(guid);
-                        }
-                    }
+                        progress.moveStyle = setMoveStyleEquipped;
+                        CharacterSaveSlots.SaveCharacterData(guid);
+                    }   
                 }
             }
         }
     }
-    */
-
-    /*
+    
+ 
     [HarmonyPatch(typeof(Reptile.Player), "SaveSelectedCharacter")]
     public class PlayerSaveCharacterPatch
     {
-        public static bool Prefix(Player __instance, ref Characters selectedCharacter)
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} PlayerSaveCharacterPatch");
+
+        //Prefix save current movestyle custom
+        //Override movestyleEquipped for original and crewboom
+        [HarmonyPriority(900)]
+        public static bool Prefix(Player __instance, ref Characters selectedCharacter, MoveStyle ___moveStyleEquipped )
         {
+            DebugLog.LogMessage("PlayerSaveSelectedCharacterPatch");
+            
             bool runOriginal = true;
 
             bool isAI = (bool) __instance.GetField("isAI").GetValue(__instance);
             bool isNew = selectedCharacter > Characters.MAX;
+            bool isCustomMoveStyle = ___moveStyleEquipped > MoveStyle.MAX;
             if (!isAI)
             {
                 CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = Guid.Empty;
 
                 if (isNew)
                 {
-                    if (CharacterDatabase.GetFirstOrConfigCharacterId(selectedCharacter, out Guid guid))
+                    if (CharUtil.GetGuidForCharacters(selectedCharacter, out Guid guid))
                     {
                         CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = guid;
                     }
                     runOriginal = false;
                 }
+                if (isCustomMoveStyle)
+                {
+                    runOriginal = false;
+                }
 
                 CharacterSaveSlots.SaveSlot();
             }
-            else if (selectedCharacter > Characters.MAX)
+            else if (isNew || isCustomMoveStyle)
             {
                 runOriginal = false;
             }
 
             return runOriginal;
         }
+
+        //Add postfix to re-set the movestyle
+
     }
-    */
-
+    
     /*
-    [HarmonyPatch(typeof(Reptile.Player), nameof(Player.PlayVoice))]
-    public class PlayerVoicePatch
+    [HarmonyPatch(typeof(Reptile.NPC), "ChangeMovestyle")]
+    public class NPCPatch
     {
-        public static bool Prefix(AudioClipID audioClipID,
-                                  VoicePriority voicePriority,
-                                  bool fromPlayer,
-                                  AudioManager ___audioManager,
-                                  ref VoicePriority ___currentVoicePriority,
-                                  Characters ___character,
-                                  AudioSource ___playerGameplayVoicesAudioSource)
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} NPCPatch");
+
+        public static void Prefix(int num)
         {
-            if (___character > Characters.MAX && CharacterDatabase.GetCharacter(___character, out CustomCharacter customCharacter))
-            {
-                if (fromPlayer)
-                {
-                    //ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("Test");
-                    //log.LogMessage(___currentVoicePriority);
-
-                    //___audioManager.InvokeMethod("PlayVoice",
-                    //    new Type[] { typeof(VoicePriority).MakeByRefType(), typeof(Characters), typeof(AudioClipID), typeof(AudioSource), typeof(VoicePriority) },
-                    //    ___currentVoicePriority, ___character, audioClipID, ___playerGameplayVoicesAudioSource, voicePriority);
-
-                    //log.LogMessage(___currentVoicePriority);
-                }
-                else
-                {
-                    ___audioManager.InvokeMethod("PlaySfxGameplay",
-                        new Type[] { typeof(SfxCollectionID), typeof(AudioClipID), typeof(float) },
-                        customCharacter.SfxID, audioClipID, 0.0f);
-                    return false;
-                }
-
-            }
-
-            return true;
+            DebugLog.LogMessage($"NPC Change Movestyle {num}");
         }
+
     }
     */
 }

@@ -24,8 +24,12 @@ namespace MoveStyler.Data
 
         public CustomMoveStyleVisualParent()
         {
-            this.CustomMoveStylesList = new List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>>();
-            this.player = base.transform.parent.parent.GetComponentInParent<Player>();  
+            this.CustomMoveStylesList = new List<KeyValuePair<MoveStyle, CustomMoveStyleVisual>>();     
+        }
+
+        void Awake()
+        {
+            this.player = base.transform.parent.parent.GetComponentInParent<Player>();
             this.characterVisual = base.transform.parent.GetComponentInParent<CharacterVisual>();
         }
 

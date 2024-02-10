@@ -10,13 +10,13 @@ using System.Linq;
 using UnityEngine.TextCore.Text;
 using MoveStyler.Data;
 using MoveStylerMono;
+using MoveStylerApi;
 
 namespace MoveStyler
 {
     public static class moveStyleDatabase
     {
         private static readonly string ASSET_PATH = Path.Combine(Paths.ConfigPath, PluginInfo.PLUGIN_NAME);
-        //private static readonly string NO_CYPHER_PATH = Path.Combine(ASSET_PATH, "no_cypher");
         public static int NewCharacterCount { get; private set; } = 0;
 
         private static Dictionary<Guid, string> _moveStyleBundlePaths;
@@ -34,7 +34,7 @@ namespace MoveStyler
             {
                 DebugLog.LogWarning($"Could not find movestyle bundle directory \"{ASSET_PATH}\".\nIt was created instead.");
                 Directory.CreateDirectory(ASSET_PATH);
-                return false;
+                //return false;
             }
 
             _moveStyleBundlePaths = new Dictionary<Guid, string>();
@@ -52,11 +52,11 @@ namespace MoveStyler
                 _moveStyleIds.Add(style, new List<Guid>());
             }
 
-            bool foundAnyCharacters = LoadAllMoveStyleData();
-            if (!foundAnyCharacters)
+            bool foundAnyMovestyles = LoadAllMoveStyleData();
+            if (!foundAnyMovestyles)
             {
-                DebugLog.LogWarning($"There were no valid movestyles found in {ASSET_PATH}.\nMake sure your character bundles (.cbb) are in the CONFIG folder, NOT the PLUGIN folder.");
-                return false;
+                DebugLog.LogWarning($"There were no valid movestyles found in {ASSET_PATH}.\nMake sure your movestyle bundles (.msb or .cbb) are in the CONFIG folder, NOT the PLUGIN folder.");
+                //return false;
             }
 
             InitializeAPI();
@@ -83,9 +83,9 @@ namespace MoveStyler
         {
             bool success = false;
 
-            DebugLog.LogMessage("Start LoadMOveStyleBundle");
+            DebugLog.LogMessage("Start Loading MoveStyler Bundles");
 
-            if (File.Exists(filePath) && Path.GetExtension(filePath) == ".cbb")
+            if (File.Exists(filePath) && ( Path.GetExtension(filePath) == ".cbb" || Path.GetExtension(filePath) == ".msb"))
             {
                 AssetBundle bundle = null;
                 try
@@ -233,7 +233,7 @@ namespace MoveStyler
             return success;
         }
 
-        /*
+        
         public static void SetOutfitShader(Shader shader)
         {
             if (shader == null)
@@ -241,28 +241,29 @@ namespace MoveStyler
                 return;
             }
 
-            foreach (CustomCharacter character in _customCharacters.Values)
+            foreach (CustomMoveStyle movestyle in _customMoveStyle.Values)
             {
-                character.ApplyShaderToOutfits(shader);
+                //character.ApplyShaderToOutfits(shader);
             }
-        }*/
+        }
 
         private static void InitializeAPI()
         {
-            /*
-            Dictionary<int, Guid> userCharacters = new Dictionary<int, Guid>();
+            
+            Dictionary<int, Guid> userMovestyles = new Dictionary<int, Guid>();
+            Dictionary<Guid, int> userMovestylesLookup = new Dictionary<Guid, int>();
 
             int max = (int)MoveStyle.MAX;
             for (int i = max + 1; i <= max + NewCharacterCount; i++)
             {
                 if (GetFirstOrConfigMoveStyleId((MoveStyle)i, out Guid id))
                 {
-                    userCharacters.Add(i, id);
+                    userMovestyles.Add(i, id);
+                    userMovestylesLookup.Add(id, i);
                 }
             }
 
-            CrewBoomAPIDatabase.Initialize(userCharacters);
-            */
+            MoveStyleAPIDatabase.Initialize(userMovestyles, userMovestylesLookup);
         }
 
         public static void InitializeMissingSfxCollections(MoveStyle character, SfxCollection collection)
@@ -399,7 +400,7 @@ namespace MoveStyler
             return replacements != null && replacements.Count > 0;
         }
 
-        public static bool GetCharacterValueFromGuid(Guid guid, out MoveStyle character)
+        public static bool GetMovestyleValueFromGuid(Guid guid, out MoveStyle character)
         {
             character = MoveStyle.ON_FOOT;
 
@@ -494,9 +495,39 @@ namespace MoveStyler
 
             Core instance = Core.Instance;
             Characters playerChar = (Characters)player.GetField("character").GetValue(player);
+
+            if (playerChar < Characters.MAX)
+            {
+                if (CharUtil.GetGuidForDefaultCharacters(playerChar, out Guid CharacterGuid))
+                {
+                    //DebugLog.LogMessage($"Save {playerChar}");
+                    if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
+                    {
+                        Prog.moveStyle = moveStyle;
+                        //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");
+                    }
+                    CharacterSaveSlots.SaveCharacterData(CharacterGuid);
+                }
+            }
+            else 
+            {
+                if (CrewBoomAPI.CrewBoomAPIDatabase.GetUserGuidForCharacter((int)playerChar, out Guid CharacterGuid))
+                {
+                    //DebugLog.LogMessage($"Save CrewBoom Character {playerChar}");
+                    if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
+                    {
+                        Prog.moveStyle = moveStyle;
+                        //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");
+                    }
+                    CharacterSaveSlots.SaveCharacterData(CharacterGuid);
+                }
+            }
+
+            /*
             if (moveStyle > MoveStyle.MAX)
             { moveStyle = MoveStyle.BMX; }  //A fall back to unbreak saves until new save scheme is implemented
             instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = moveStyle;
+            */
         }
 
         private static void getConfigFadeInfo(CustomAnimInfo Info, String Json)

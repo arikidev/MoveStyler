@@ -26,7 +26,7 @@ namespace MoveStyler
 
             if (moveStyleDatabase.Initialize())
             {
-                Harmony harmony = new Harmony("ariki.moveStyler");
+                Harmony harmony = new Harmony("Ariki.moveStyler");
                 harmony.PatchAll();
 
                 Logger.LogMessage($"Loaded all available movestyles!");
@@ -34,6 +34,11 @@ namespace MoveStyler
 
             Logger.LogMessage($"Init Phone App");
             MoveStylerApp.Initialize();
+
+            MoveStylerEmailManager.Initialize();
+
+            
+
         }
 
         void Update()
@@ -41,22 +46,17 @@ namespace MoveStyler
             /*
             if (Input.GetKeyDown(KeyCode.G))
             {
-                ChangeplayerMovestyle(false);
+                Logger.LogMessage($"Try Push Email Test");
+                //MoveStylerEmailManager.TryEmail();
             }
+            
             if (Input.GetKeyDown(KeyCode.H))
             {
-                ChangeplayerMovestyle(true);
+                Logger.LogMessage($"Try Push Email Test");
+                MoveStylerEmailManager.TryEmail();
             }
             */
         }
 
-        private void ChangeplayerMovestyle(bool reverse = false)
-        {
-            Player localPlayer = WorldHandler.instance.GetCurrentPlayer();
-            if (localPlayer == null) { return; }
-      
-            moveStyleDatabase.advancePlayerMovementStyle(localPlayer, reverse);
-
-        }
     }
 }

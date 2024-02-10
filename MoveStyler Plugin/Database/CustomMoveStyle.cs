@@ -29,7 +29,6 @@ namespace MoveStyler.Data
 		public Dictionary<int, CustomAnimInfo> customAnimInfoDict;
 
 		public MovementStats movementStats;
-
 		public GameObject Visual
 		{
 			get
@@ -98,20 +97,6 @@ namespace MoveStyler.Data
 		// Token: 0x040013AF RID: 5039
 		private int turnDirectionSkateboardHash;
 		#endregion
-		/**
-        public GraffitiArt Graffiti { get; private set; }
-
-        private static readonly List<AudioClipID> VOICE_IDS = new List<AudioClipID>()
-        {
-            AudioClipID.VoiceDie,
-            AudioClipID.VoiceDieFall,
-            AudioClipID.VoiceTalk,
-            AudioClipID.VoiceBoostTrick,
-            AudioClipID.VoiceCombo,
-            AudioClipID.VoiceGetHit,
-            AudioClipID.VoiceJump
-        };
-        */
 
 		//Constructor
 		public CustomMoveStyle(MoveStyleDefinition definition, SfxCollectionID sfxID, int index)
@@ -133,14 +118,12 @@ namespace MoveStyler.Data
 
 			initCustomSFX();
 
-
 			Props = new List<KeyValuePair<MeshRenderer, string>>();
 
 		}
 
 		private void CreateVisual()
 		{
-			DebugLog.LogMessage("Create Visual");
 
 			GameObject parent = new GameObject($"{Definition.Movestylename} Visuals");
 			MoveStyleDefinition moveStyleModel = UnityEngine.Object.Instantiate(Definition);
@@ -155,7 +138,6 @@ namespace MoveStyler.Data
 			{
 				MeshRenderer renderer = moveStyleModel.PropRenderers[i];
 				string bone = moveStyleModel.PropAttachmentBones[i];
-				//DebugLog.LogMessage("Bone:" + bone);
 
 				renderer.receiveShadows = false;
 				renderer.gameObject.layer = 15;
@@ -163,10 +145,8 @@ namespace MoveStyler.Data
 				renderer.gameObject.transform.SetParent(parent.transform);
 
 				Props.Add(new KeyValuePair<MeshRenderer, string>(renderer, bone));
-				//DebugLog.LogMessage("Renderer: " + renderer.name);
 			}
 
-			//InitCharacterVisuals
 			parent.SetActive(false);
 
 			_visual = parent;
@@ -174,8 +154,6 @@ namespace MoveStyler.Data
 
 		private void createAnimInfo()
 		{
-			//DebugLog.LogMessage("Custom Movestyle | Create Anim Info");
-
 			//Init Hash Values
 			this.canSprayHash = Animator.StringToHash("canSpray");
 			this.canShakeHash = Animator.StringToHash("canShake");
@@ -210,18 +188,9 @@ namespace MoveStyler.Data
 		{
 			DebugLog.LogMessage("InitCustomAnimInfo");
 
-			//Increase the size of the AnimInfoArray on the player
-			//Dictionary<int, Player.AnimInfo>[] customAnimInfoArray = (Dictionary<int, Player.AnimInfo>[])_player.GetField("animInfosSets").GetValue(_player);
-			//Array.Resize(ref customAnimInfoArray, moveStyleDatabase.NewCharacterCount + 5);
-			//_player.GetField("animInfosSets").SetValue(_player, customAnimInfoArray);
-
-			//DebugLog.LogMessage(_player);
-			//DebugLog.LogMessage(ParentMovestyle);
-
 			//Set Player Movestyle to custom Movestyle
 			_player.GetField("moveStyle").SetValue(_player, ParentMovestyle);
 
-			//DebugLog.LogMessage("setParentAnimInfo");
 			switch (ParentMovestyle)
 			{
 				case MoveStyle.BMX:
@@ -1403,7 +1372,6 @@ namespace MoveStyler.Data
 
 		private void setCustomAnimInfoOverrides(Player _player, MoveStyle Movestyle)
 		{
-			//DebugLog.LogMessage("set Custom Anim Info Overrides");
 
 			Dictionary<int, Player.AnimInfo> animInfoDict = new Dictionary<int, Player.AnimInfo>();
 
@@ -1472,9 +1440,6 @@ namespace MoveStyler.Data
 					}
 				}
 			}
-
-			//DebugLog.LogMessage("Finished Custom Anim Overrides");
-
 		}
 
 		private void initCustomMovementStats()
@@ -1494,7 +1459,6 @@ namespace MoveStyler.Data
 			movementStats.slideDeccHighSpeed = Definition.slideDeccHighSpeed;
 			movementStats.slideDeccLowSpeed = Definition.slideDeccLowSpeed;
 
-
 		}
 
 		//Set Movement Stats for Custom MoveStyles
@@ -1508,7 +1472,6 @@ namespace MoveStyler.Data
 
 		public void initCustomSFX()
 		{
-
 			DebugLog.LogMessage("Init Custom SFX");
 
 			SfxCollection newCollection = ScriptableObject.CreateInstance<SfxCollection>();
@@ -1528,7 +1491,6 @@ namespace MoveStyler.Data
 				}
 				else 
 				{
-					//DebugLog.LogMessage($"Trying to add new list, index: {i}");
 					List < AudioClip >  list = new List<AudioClip>();
 					list.Add(Definition.CustomAudioClips[i]);
 					OrderSFXLists.Add(id, list);
@@ -1538,7 +1500,6 @@ namespace MoveStyler.Data
 			
 			newCollection.audioClipContainers = new SfxCollection.RandomAudioClipContainer[sfxLength];
 	
-
 			// Fill newCollection with OrderList
 			int index = 0;
 			foreach (KeyValuePair< int, List<AudioClip>> pair in OrderSFXLists)
@@ -1558,15 +1519,7 @@ namespace MoveStyler.Data
 			BaseClips.Add(Definition.Wallrun);
 			BaseClips.Add(Definition.Slide);
 			//BaseClips.Add(Definition.Grind);
-			//BaseClips.Add(Definition.GrindTrick1);
-			//BaseClips.Add(Definition.GrindTrick2);
-			//BaseClips.Add(Definition.GrindTrick3);
-			//BaseClips.Add(Definition.GroundTrick1);
-			//BaseClips.Add(Definition.GroundTrick2);
-			//BaseClips.Add(Definition.GroundTrick3);
-			//BaseClips.Add(Definition.AirTrick1);
-			//BaseClips.Add(Definition.AirTrick2);
-			//BaseClips.Add(Definition.AirTrick3);
+
 			BaseClips.Add(Definition.HandPlant);
 
 			List<int> BaseClipsIDS = new List<int>();
@@ -1576,24 +1529,14 @@ namespace MoveStyler.Data
 			BaseClipsIDS.Add(407);      //Definition.Walk); **Change to wall run
 			BaseClipsIDS.Add(51);		//Definition.Slide);
 			//BaseClipsIDS.Add(11);		//Definition.Grind); **Don't Need this
-			//BaseClipsIDS.Add(7777);		//Definition.GrindTrick1);
-			//BaseClipsIDS.Add(7777);		//Definition.GrindTrick2);
-			//BaseClipsIDS.Add(7777);      //Definition.GrindTrick3);
-			//BaseClipsIDS.Add(318);      //Definition.GroundTrick1);
-			//BaseClipsIDS.Add(405);      //Definition.GroundTrick2);
-			//BaseClipsIDS.Add(408);		//Definition.GroundTrick3);
-			//BaseClipsIDS.Add(7777);		//Definition.AirTrick1);
-			//BaseClipsIDS.Add(7777);		//Definition.AirTrick2);
-			//BaseClipsIDS.Add(7777);		//Definition.AirTrick3);
 			BaseClipsIDS.Add(389);      //Definition.HandPlant);
 
 			int ind = 0;
 			foreach (AudioClip[] clips in BaseClips)
 			{
-				
 				newCollection.audioClipContainers[index] = new SfxCollection.RandomAudioClipContainer();
 				newCollection.audioClipContainers[index].clipID = (AudioClipID)BaseClipsIDS[ind] ; //This is override the enumValues
-				if (clips.Length > 0) { newCollection.audioClipContainers[index].clips = clips; DebugLog.LogDebug($"Added Clip: {clips[0]} "); } // This is to allow for the GetClip function to fail safely.
+				if (clips.Length > 0) { newCollection.audioClipContainers[index].clips = clips; } // This is to allow for the GetClip function to fail safely.
 				else { DebugLog.LogWarning($"Failed to find clip "); }
 				newCollection.audioClipContainers[index].lastRandomClip = 0;
 
@@ -1622,9 +1565,26 @@ namespace MoveStyler.Data
 				}
 			}
 
-			
 			Sfx = newCollection;
-
 		}
+
+		/*
+		public void ApplyShaderToOutfits(Shader shader)
+		{
+			foreach (CharacterOutfit outfit in Definition.Outfits)
+			{
+				foreach (CharacterOutfitRenderer container in outfit.MaterialContainers)
+				{
+					for (int i = 0; i < container.Materials.Length; i++)
+					{
+						if (container.UseShaderForMaterial[i])
+						{
+							container.Materials[i].shader = shader;
+						}
+					}
+				}
+			}
+		}
+		*/
 	}
 }

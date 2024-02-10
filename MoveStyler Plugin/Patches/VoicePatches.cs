@@ -32,7 +32,6 @@ namespace MoveStyler.Patches
 
                 VoiceUtility.AddNewMovestyleSFXCollection(sfxLibrary, style.Sfx, style.SfxID, style.name);
 
-                DebugLog.LogMessage("Added Movestyle To SfXLibrary");
             }
         }
 
@@ -43,7 +42,6 @@ namespace MoveStyler.Patches
             if (moveStyle > MoveStyle.MAX)
             {
 
-                
                 CustomMoveStyle style; moveStyleDatabase.GetCharacter(moveStyle, out style);
                 moveStyle = (MoveStyle)((int)style.SfxID - (int)SfxCollectionID.MoveStyle_0_Default );
                 //DebugLog.LogMessage($"movestyle SFXID:  {(int)style.SfxID} {(int)moveStyle} , id = {audioClipId}");
@@ -157,11 +155,7 @@ namespace MoveStyler.Patches
             if (___moveStyle <= MoveStyle.MAX) // Early Out
             { return true; }
 
-            //DebugLog.LogMessage($"Test movestyle");
-
             CustomMoveStyle style; moveStyleDatabase.GetCharacter(___moveStyle, out style);
-
-            //DebugLog.LogMessage($"Get Custom Movesytle | {___ability}, {___targetMovement}, {__instance}, {___playerMovementLoopAudioSource} ");
 
             // ability is null | onGround | targetMovement is Running or walking | Is Movestyle Correct
             if (___ability  == null && (___targetMovement == Player.MovementType.RUNNING || ___targetMovement == Player.MovementType.WALKING) && __instance.IsGrounded())
@@ -221,11 +215,9 @@ namespace MoveStyler.Patches
             //Sfx Collections for custom Movestyles have a final identifier container with ID @9999
             bool isCustomMovestyle = ( audioClipContainers[audioClipContainers.Length - 1].clipID == (AudioClipID)9999);
 
-            //DebugLog.LogMessage($"Final ID = {(int)audioClipContainers[audioClipContainers.Length - 1].clipID}");
 
             if (isCustomMovestyle)
             {
-                //DebugLog.LogMessage("Found Custom Movestyle SFX Request. Patching...");
 
                 __result = VoiceUtility.GetAudioClipContainerFromIDCustom(ref audioClipContainers, clipID);
                 return false;

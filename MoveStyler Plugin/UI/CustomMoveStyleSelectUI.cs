@@ -60,6 +60,8 @@ namespace MoveStyler.UI
                 var button = PhoneUIUtility.CreateSimpleButton(name);
                 button.OnConfirm += () =>
                 {
+                    //Add in highlighting the currently selected movestyle
+
                     var player = WorldHandler.instance.GetCurrentPlayer();
                     moveStyleDatabase.setPlayerMovementStyle(player, style);
                 };
@@ -84,5 +86,4 @@ namespace MoveStyler.UI
             }
         }
     }
-
 }

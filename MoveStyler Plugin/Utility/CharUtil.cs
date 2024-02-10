@@ -2,6 +2,7 @@
 using Reptile;
 using System;
 using UnityEngine;
+using BepInEx.Logging;
 
 namespace MoveStyler
 {
@@ -92,6 +93,43 @@ namespace MoveStyler
             }
             */
             return outfit;
+        }
+
+        public static bool GetGuidForDefaultCharacters(Characters character, out Guid guid)
+        {
+            guid = new Guid();
+
+            if (character > Characters.MAX) { return false; }
+
+            string charName = character.ToString("X");
+            if (charName.Length > 8)
+            {
+                charName = charName.Remove(8);
+            }
+            charName = charName.PadRight(8, '0');
+            charName += "-0000-0000-0000-000000000000";
+
+            if (Guid.TryParse(charName, out guid))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool GetGuidForCharacters(Characters character, out Guid guid)
+        {
+            guid = Guid.Empty;
+
+            if (character < Characters.MAX)
+            {
+                GetGuidForDefaultCharacters( character, out guid);
+            }
+            else if(CrewBoomAPI.CrewBoomAPIDatabase.IsInitialized)
+            {
+                CrewBoomAPI.CrewBoomAPIDatabase.GetUserGuidForCharacter((int)character, out guid);
+            }
+
+            return guid != Guid.Empty;
         }
     }
 }
