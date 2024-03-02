@@ -17,14 +17,14 @@ namespace MoveStyler
     public static class moveStyleDatabase
     {
         private static readonly string ASSET_PATH = Path.Combine(Paths.ConfigPath, PluginInfo.PLUGIN_NAME);
-        public static int NewCharacterCount { get; private set; } = 0;
+        public static int NewMovestyleCount { get; private set; } = 0;
 
         private static Dictionary<Guid, string> _moveStyleBundlePaths;
         private static Dictionary<Guid, CustomMoveStyle> _customMoveStyle;
         private static Dictionary<MoveStyle, List<Guid>> _moveStyleIds;
 
-        public static bool HasCharacterOverride { get; private set; }
-        public static Guid CharacterOverride { get; private set; }
+        public static bool HasMovestyleOverride { get; private set; }
+        public static Guid MovestyleOverride { get; private set; }
 
         private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} StyleDatabase");
 
@@ -85,7 +85,7 @@ namespace MoveStyler
 
             DebugLog.LogMessage("Start Loading MoveStyler Bundles");
 
-            if (File.Exists(filePath) && ( Path.GetExtension(filePath) == ".cbb" || Path.GetExtension(filePath) == ".msb"))
+            if (File.Exists(filePath) && (Path.GetExtension(filePath) == ".msb")) //( Path.GetExtension(filePath) == ".cbb" || Path.GetExtension(filePath) == ".msb"))
             {
                 AssetBundle bundle = null;
                 try
@@ -193,9 +193,9 @@ namespace MoveStyler
 
                             SfxCollectionID sfxID = SfxCollectionID.NONE;
                             
-                            NewCharacterCount++;
+                            NewMovestyleCount++;
 
-                            MoveStyle newMoveStyleEnum = MoveStyle.MAX + NewCharacterCount;
+                            MoveStyle newMoveStyleEnum = MoveStyle.MAX + NewMovestyleCount;
                             sfxID = VoiceUtility.GetMovestyleSFXCollectionID(newMoveStyleEnum); //Using the 100's to try stop interferance with CrewBoom
 
                             if (_moveStyleIds.ContainsKey(newMoveStyleEnum))
@@ -254,7 +254,7 @@ namespace MoveStyler
             Dictionary<Guid, int> userMovestylesLookup = new Dictionary<Guid, int>();
 
             int max = (int)MoveStyle.MAX;
-            for (int i = max + 1; i <= max + NewCharacterCount; i++)
+            for (int i = max + 1; i <= max + NewMovestyleCount; i++)
             {
                 if (GetFirstOrConfigMoveStyleId((MoveStyle)i, out Guid id))
                 {
@@ -419,7 +419,7 @@ namespace MoveStyler
         public static void advancePlayerMovementStyle(Player player, bool reverse = false)
         { 
             MoveStyle equiptMovestyle = (MoveStyle)player.GetField("moveStyleEquipped").GetValue(player);
-            int numberOfMovestyles = (int)MoveStyle.MAX + NewCharacterCount;
+            int numberOfMovestyles = (int)MoveStyle.MAX + NewMovestyleCount;
 
             MoveStyle newMovestyle = equiptMovestyle;
 
@@ -496,38 +496,17 @@ namespace MoveStyler
             Core instance = Core.Instance;
             Characters playerChar = (Characters)player.GetField("character").GetValue(player);
 
-            if (playerChar < Characters.MAX)
+            if (CharUtil.GetGuidForCharacters(playerChar, out Guid CharacterGuid))
             {
-                if (CharUtil.GetGuidForDefaultCharacters(playerChar, out Guid CharacterGuid))
+                //DebugLog.LogMessage($"Save {playerChar}");
+                if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
                 {
-                    //DebugLog.LogMessage($"Save {playerChar}");
-                    if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
-                    {
-                        Prog.moveStyle = moveStyle;
-                        //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");
-                    }
-                    CharacterSaveSlots.SaveCharacterData(CharacterGuid);
+                    Prog.moveStyle = moveStyle;
+                    //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");
                 }
-            }
-            else 
-            {
-                if (CrewBoomAPI.CrewBoomAPIDatabase.GetUserGuidForCharacter((int)playerChar, out Guid CharacterGuid))
-                {
-                    //DebugLog.LogMessage($"Save CrewBoom Character {playerChar}");
-                    if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
-                    {
-                        Prog.moveStyle = moveStyle;
-                        //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");
-                    }
-                    CharacterSaveSlots.SaveCharacterData(CharacterGuid);
-                }
+                CharacterSaveSlots.SaveCharacterData(CharacterGuid);
             }
 
-            /*
-            if (moveStyle > MoveStyle.MAX)
-            { moveStyle = MoveStyle.BMX; }  //A fall back to unbreak saves until new save scheme is implemented
-            instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(playerChar).moveStyle = moveStyle;
-            */
         }
 
         private static void getConfigFadeInfo(CustomAnimInfo Info, String Json)

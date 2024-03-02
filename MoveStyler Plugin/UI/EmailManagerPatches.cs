@@ -68,7 +68,7 @@ namespace MoveStyler.UI
 
         [HarmonyPrefix]
         [HarmonyPatch("SetContent")]
-        public static bool SetContentpatch(EmailCard __instance, AUnlockable content, ref Image ___m_ProfilePicture)
+        public static bool SetContentpatch(EmailCard __instance, AUnlockable content, ref Image ___m_ProfilePicture, ref Image ___m_BackgroundImage)
         {
             EmailMessage emailMessage = (content as EmailMessage);
             
@@ -88,14 +88,14 @@ namespace MoveStyler.UI
 
                     Subject.text = emailMessage.subject;
                     string name = emailMessage.characterNameIDOfSender.ToString();
+
                     if (MoveStylerEmailManager._MSContacts.TryGetValue(emailMessage.characterNameIDOfSender, out CustomContact contact ))
                     {
                         name = contact.characterName;
                         ___m_ProfilePicture.sprite = contact.avatar;
+                        
                     }
                     Sender.text = name;
-
-                    //__instance.SetEmailCardTexts(); // invoke
 
                     return false;
                 }

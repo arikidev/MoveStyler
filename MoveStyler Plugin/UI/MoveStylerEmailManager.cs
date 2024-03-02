@@ -64,7 +64,7 @@ namespace MoveStyler.UI
             _MSContacts = new Dictionary<int, CustomContact>();
 
             CustomContact MS_Contact = new CustomContact(msgSenderID, "Movestyler");
-            Texture2D texture = TextureUtil.GetTextureFromBitmap(Properties.Resources.phoneAppIcon);
+            Texture2D texture = TextureUtil.GetTextureFromBitmap(Properties.Resources.MS_Email_Icon);
             MS_Contact.avatar = TextureUtility.CreateSpriteFromTexture(texture);
 
             _MSContacts.Add(MS_Contact.characterID, MS_Contact);
