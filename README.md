@@ -10,30 +10,13 @@ This is retooling of Giygas's CrewBoom and there are still numerous references t
 
 ## Usage
 
-Use the keys 'G,H' to navigate through default and custom movestyles
+Use the new Phone app to select custom movestyles
 
 ## Downloads, instructions and help
 
 ### [Plugin](https://github.com/arikidev/MoveStyler/releases)
 ### [Unity project](https://github.com/arikidev/MoveStyler/releases/tag/WIP-0.1-Proj)
 ### [Example Movestyle](https://github.com/arikidev/MoveStyler/releases/tag/WIP_0.1_Example)
-
-To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
-The project works similar to Crew Boom so you can look at the instructions there for help.
-
-## How to:
-1. Copy or create your own animator. BRC uses specific naming of the states in the animator to call animations. Refer to the example in the proj for reference. (I recomend copying one of the templates)
-2. Import any new assets. Meshes and animations.
-3. Change any animations that you want in your new animator
-
-### Create a prefab
-1. Add an empty transform
-2. Add a animator component and assign your new animator
-3. Add one or more mesh render components. remove any collision
-4. Save the prefab
-5. Right Click the prefab and use MoveStyler/Create Custom Movestyle.
-6. Adjust the settings in your new custom Movestyle asset
-7. Click -> Build Custom MoveStyle.
 
 ## Installation
 
@@ -54,7 +37,6 @@ To install BepInEx, follow these steps:
 1. Navigate to your BepInEx installation for the game and open the `BepInEx/config/MoveStyler/` folder
 2. Copy your character files (.cbb and .json) into the `MoveStyler` folder
 
-
 ## Building the plugin
 
 This pertains to if you want to build the plugin yourself, not the Unity project.  
@@ -62,9 +44,27 @@ This pertains to if you want to build the plugin yourself, not the Unity project
 You will need to copy Bomb Rush Cyberfunk's `Assembly-CSharp.dll` into the `Libraries` folder of the project, as it is not provided.  
 It can be found at `<path to where your games are stored>\BombRushCyberfunk\Bomb Rush Cyberfunk_Data\Managed`
 
+To create a movestyle mod you will need both of these. If you just want to use a character you downloaded, you only need the plugin. 
+The project works similar to Crew Boom so you can look at the instructions there for help.
+
+## How to create your own custom Movestyle:
+1. Copy or create your own animator. BRC uses specific naming of the states in the animator to call animations. Refer to the example in the proj for reference. (I recomend copying one of the templates)
+2. Import any new assets. Meshes and animations.
+3. Change any animations that you want in your new animator
+
+### Create a prefab
+1. Add an empty transform
+2. Add a animator component and assign your new animator
+3. Add one or more mesh render components. remove any collision
+4. Save the prefab
+5. Right Click the prefab and use MoveStyler/Create Custom Movestyle.
+6. Adjust the settings in your new custom Movestyle asset
+7. Click -> Build Custom MoveStyle.
+
 ## Authors and acknowledgment
 
-This project was based on [CrewBoom] by SGiygas https://github.com/SGiygas/CrewBoom
+This project was based on [CrewBoom] by SGiygas https://github.com/SGiygas/CrewBoom.
+They cannot be held accountable for my crappy coding!
 
 ## License
 This project is licensed under the GNU General Public License v3.0
