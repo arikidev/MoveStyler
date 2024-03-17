@@ -26,7 +26,7 @@ namespace MoveStyler.Patches
             CustomMoveStyleVisualParent parent = __instance.anim.gameObject.AddComponent<CustomMoveStyleVisualParent>();
             if (parent == null) { DebugLog.LogMessage("CustomMoveSyleVisuals is null "); return; }
 
-            for (int index = 1; index <= moveStyleDatabase.NewCharacterCount; index++)
+            for (int index = 1; index <= moveStyleDatabase.NewMovestyleCount; index++)
             {
                 //DebugLog.LogMessage($"movestyleLoop: {index} ");
 
@@ -40,16 +40,15 @@ namespace MoveStyler.Patches
                 CustomMoveStyleVisual moveStyleVisual = new CustomMoveStyleVisual();
                 if (moveStyleVisual == null) { DebugLog.LogMessage("moveStyleVisual == null"); }
 
-                foreach (KeyValuePair<MeshRenderer, string> prop in TempCustomStyle.Props)
+                foreach (KeyValuePair<GameObject, string> prop in TempCustomStyle.Props)
                 {
-                    GameObject newObj = UnityEngine.Object.Instantiate(prop.Key.gameObject);
+                    GameObject newObj = UnityEngine.Object.Instantiate(prop.Key);
 
                     if (newObj == null) { DebugLog.LogMessage("newObj == null"); }
 
                     moveStyleVisual.AddPropObject(newObj, prop.Value);
                 }
                 //Todo add ability to scale props
-
 
                 //Store Custom Movestyle in CustomMoveStyleVisualParent
                 parent.CustomMoveStylesList.Add(new KeyValuePair<MoveStyle, CustomMoveStyleVisual>(style, moveStyleVisual));

@@ -66,12 +66,12 @@ namespace MoveStyler
         {
             firstActiveRenderer = null;
 
-            CharacterDefinition characterDefinition = source.GetComponentInChildren<CharacterDefinition>(true);
-            if (characterDefinition != null)
-            {
+            //CharacterDefinition characterDefinition = source.GetComponentInChildren<CharacterDefinition>(true);
+            //if (characterDefinition != null)
+            //{
                 //characterDefinition.SetOutfit(outfit, out firstActiveRenderer);
-                return true;
-            }
+            //    return true;
+            //}
 
             return false;
         }

@@ -89,13 +89,14 @@ namespace MoveStyler.Patches
 
             MoveStyle originalStyle = (MoveStyle)__instance.GetField("moveStyle").GetValue(__instance);
 
+            //Get Animinfo set
             Dictionary<int, Player.AnimInfo>[] animInfoSets = (Dictionary<int, Player.AnimInfo>[])__instance.GetField("animInfosSets").GetValue(__instance);
 
             //Resize Array to match new custom styles
-            Array.Resize(ref animInfoSets, animInfoSets.Length + moveStyleDatabase.NewCharacterCount + 1);
+            Array.Resize(ref animInfoSets, animInfoSets.Length + moveStyleDatabase.NewMovestyleCount + 1);
             __instance.GetField("animInfosSets").SetValue(__instance, animInfoSets);
 
-            for (int id = 1; id <= moveStyleDatabase.NewCharacterCount; id++)
+            for (int id = 1; id <= moveStyleDatabase.NewMovestyleCount; id++)
             {
                 
                 MoveStyle moveStyle = id + MoveStyle.MAX;
@@ -146,7 +147,7 @@ namespace MoveStyler.Patches
     {
         private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
 
-        public static void Postfix(ref Player __instance, int newAnim, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
+        public static void Postfix(ref Player __instance, int newAnim, Dictionary<int, Player.AnimInfo>[]  ___animInfosSets, ref CharacterVisual ___characterVisual, bool forceOverwrite = false, bool instant = false, float atTime = -1f)
         {
             if (__instance == null) { DebugLog.LogMessage($"player instance is null"); return; }
 
@@ -174,6 +175,10 @@ namespace MoveStyler.Patches
 
                 parent.LHandIKCurrent = lHandIK;
                 parent.RHandIKCurrent = rHandIK;
+
+                //Dictionary<int,Player.AnimInfo> animInfos = ___animInfosSets[(int)style];
+                //DebugLog.LogMessage($"FeetIK = {___characterVisual.feetIK}");
+                //___characterVisual.feetIK = animInfos[newAnim].feetIK;
             }
         }
     }
@@ -308,7 +313,37 @@ namespace MoveStyler.Patches
         //Add postfix to re-set the movestyle
 
     }
-    
+
+    [HarmonyPatch(typeof(Reptile.Player), "FixedUpdateAbilities")]
+    public class PlayerFixedUpdateAbilitiesPatch
+    {
+        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} PlayerSaveCharacterPatch");
+
+        //Change in place ___inwalkzone to stop movestyles from switching to on foot unless triggered by button.
+        public static void Prefix(Player __instance, ref bool ___inWalkZone, ref MoveStyle ___moveStyleEquipped, out bool __state)
+        {
+            __state = ___inWalkZone;
+
+            if (___moveStyleEquipped > MoveStyle.MAX)
+            {
+                if (moveStyleDatabase.GetCharacter(___moveStyleEquipped, out CustomMoveStyle custom))
+                {
+                    if (custom.Definition.StopSwitchToOnFoot)
+                    {
+                        ___inWalkZone = false;
+                    }
+                }
+            }
+
+        }
+
+        public static void Postfix(Player __instance, ref bool ___inWalkZone, ref MoveStyle ___moveStyleEquipped, bool __state)
+        {
+            ___inWalkZone = __state;
+        }
+    }
+
+            
     /*
     [HarmonyPatch(typeof(Reptile.NPC), "ChangeMovestyle")]
     public class NPCPatch

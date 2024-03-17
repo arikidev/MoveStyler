@@ -4,7 +4,7 @@
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>MoveStyler</AssemblyName>
     <Description>A plugin to load custom movestyles for Bomb Rush Cyberfunk.</Description>
-    <Version>3.2.5</Version>
+    <Version>4.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

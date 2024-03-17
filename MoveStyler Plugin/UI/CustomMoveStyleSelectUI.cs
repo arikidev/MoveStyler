@@ -17,7 +17,13 @@ namespace MoveStyler.UI
     public class MoveStylerApp : CustomApp
     {
 
-        List<SimplePhoneButton> styleButtons;
+        private static List< KeyValuePair<SimplePhoneButton, MoveStyle>> styleButtons;
+
+        private static UnityEngine.Color defaultSelectedColor;
+        private static UnityEngine.Color defaultUnSelectedColor;
+
+        private static UnityEngine.Color equiptSelectedColor;
+        private static UnityEngine.Color equiptUnSelectedColor;
 
         static Sprite Icon = null;
 
@@ -26,6 +32,14 @@ namespace MoveStyler.UI
             Texture2D texture = TextureUtil.GetTextureFromBitmap(Properties.Resources.phoneAppIcon);
             Icon = TextureUtility.CreateSpriteFromTexture(texture);
             PhoneAPI.RegisterApp<MoveStylerApp>("MoveStyles", Icon);
+
+            equiptSelectedColor = new UnityEngine.Color( 1.0f, 0.7f, 0.0f, 1.0f);
+            equiptUnSelectedColor = new UnityEngine.Color(1.0f, 0.75f, 0.25f, 1.0f);
+
+            defaultSelectedColor = new Color32(49, 90, 165, 255);
+            defaultUnSelectedColor = UnityEngine.Color.white;
+
+            styleButtons = new List<KeyValuePair<SimplePhoneButton, MoveStyle>>();
         }
 
         public override void OnAppInit()
@@ -35,7 +49,7 @@ namespace MoveStyler.UI
             CreateTitleBar("MoveStylz", Icon);
             ScrollView = PhoneScrollView.Create(this);
 
-            int customMoveStylesMax = moveStyleDatabase.NewCharacterCount;
+            int customMoveStylesMax = moveStyleDatabase.NewMovestyleCount;
 
             for (int i = 1; i < 4; i++)
             {
@@ -67,6 +81,7 @@ namespace MoveStyler.UI
                 };
 
                 ScrollView.AddButton(button);
+                styleButtons.Add(new KeyValuePair<SimplePhoneButton, MoveStyle>(button, style));
             }
 
             for (int i = 1; i <= customMoveStylesMax; i++)
@@ -83,6 +98,31 @@ namespace MoveStyler.UI
                 };
 
                 ScrollView.AddButton(button);
+                styleButtons.Add(new KeyValuePair<SimplePhoneButton, MoveStyle>(button, style));
+            }
+        }
+
+        public void setButtonState()
+        {
+            if (true)
+            {
+                var player = WorldHandler.instance.GetCurrentPlayer();
+
+                foreach (KeyValuePair<SimplePhoneButton, MoveStyle> pair in styleButtons)
+                {
+                    MoveStyle equiptMovestyle = (MoveStyle)player.GetField("moveStyleEquipped").GetValue(player);
+
+                    if (equiptMovestyle == pair.Value)
+                    {
+                        pair.Key.LabelSelectedColor = equiptSelectedColor;
+                        pair.Key.LabelUnselectedColor = equiptUnSelectedColor;
+                    }
+                    else 
+                    {
+                        pair.Key.LabelSelectedColor = defaultSelectedColor;
+                        pair.Key.LabelUnselectedColor = defaultUnSelectedColor;
+                    }
+                }
             }
         }
     }

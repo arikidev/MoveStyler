@@ -20,7 +20,7 @@ namespace MoveStyler.Patches
         [HarmonyPatch("InitializeSfxLibrary")]
         public static void InitializeSfxLibraryPatch(AudioManager __instance)
         {
-            for (int i = 0; i < moveStyleDatabase.NewCharacterCount; i++)
+            for (int i = 0; i < moveStyleDatabase.NewMovestyleCount; i++)
             {
                 CustomMoveStyle style;
                 moveStyleDatabase.GetCharacter(MoveStyle.MAX + i + 1, out style);

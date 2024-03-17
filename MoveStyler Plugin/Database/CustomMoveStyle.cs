@@ -42,7 +42,7 @@ namespace MoveStyler.Data
 		}
 		private GameObject _visual;
 
-		public List<KeyValuePair<MeshRenderer, string>> Props;
+		public List<KeyValuePair<GameObject, string>> Props;
 
 		#region: Animation Hashes
 
@@ -118,7 +118,8 @@ namespace MoveStyler.Data
 
 			initCustomSFX();
 
-			Props = new List<KeyValuePair<MeshRenderer, string>>();
+
+			Props = new List<KeyValuePair<GameObject, string>>();
 
 		}
 
@@ -134,17 +135,18 @@ namespace MoveStyler.Data
 			moveStyleModel.transform.SetParent(parent.transform, false);
 
 			//InitMeshRendererForProps and attachment
-			for (int i = 0; i < moveStyleModel.PropRenderers.Length; i++)
+			for (int i = 0; i < moveStyleModel.PropObjects.Length; i++)
 			{
-				MeshRenderer renderer = moveStyleModel.PropRenderers[i];
+				GameObject propObj = moveStyleModel.PropObjects[i];
 				string bone = moveStyleModel.PropAttachmentBones[i];
 
-				renderer.receiveShadows = false;
-				renderer.gameObject.layer = 15;
-				renderer.gameObject.SetActive(true);
-				renderer.gameObject.transform.SetParent(parent.transform);
+				//renderer.receiveShadows = false;
+				propObj.gameObject.layer = 15;
+				propObj.gameObject.SetActive(true);
+				propObj.gameObject.transform.SetParent(parent.transform);
 
-				Props.Add(new KeyValuePair<MeshRenderer, string>(renderer, bone));
+				Props.Add(new KeyValuePair<GameObject, string>(propObj, bone));
+				//DebugLog.LogMessage("Renderer: " + renderer.name);
 			}
 
 			parent.SetActive(false);

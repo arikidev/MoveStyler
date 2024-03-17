@@ -68,7 +68,7 @@ namespace MoveStyler
         {
             bool foundAtLeastOneCharacter = false;
 
-            foreach (string filePath in Directory.GetFiles(ASSET_PATH, "*.cbb"))
+            foreach (string filePath in Directory.GetFiles(ASSET_PATH, "*.msb"))
             {
                 if (LoadMoveStyleBundle(filePath, true))
                 {
@@ -249,9 +249,13 @@ namespace MoveStyler
 
         private static void InitializeAPI()
         {
-            
+            DebugLog.LogMessage("Movestyle API");
+
             Dictionary<int, Guid> userMovestyles = new Dictionary<int, Guid>();
             Dictionary<Guid, int> userMovestylesLookup = new Dictionary<Guid, int>();
+
+            Dictionary<int, string> userMovestylesNames = new Dictionary<int, string>();
+            Dictionary<string, int> userMovestylesNameLookup = new Dictionary<string, int>();
 
             int max = (int)MoveStyle.MAX;
             for (int i = max + 1; i <= max + NewMovestyleCount; i++)
@@ -260,10 +264,22 @@ namespace MoveStyler
                 {
                     userMovestyles.Add(i, id);
                     userMovestylesLookup.Add(id, i);
+
+
+                    if (GetCharacter(id, out CustomMoveStyle movestyle))
+                    {
+                        DebugLog.LogMessage($"Add : {movestyle.Definition.Movestylename} | {i}");
+                        userMovestylesNames.Add(i, movestyle.Definition.Movestylename);
+                        userMovestylesNameLookup.Add(movestyle.Definition.Movestylename, i);
+                    }
+                    else 
+                    {
+                        DebugLog.LogError($"Failed to add Movestyle ({i}) to API Database, Things may not work as expected");
+                    }
                 }
             }
 
-            MoveStyleAPIDatabase.Initialize(userMovestyles, userMovestylesLookup);
+            MoveStyleAPIDatabase.Initialize(userMovestyles, userMovestylesLookup, userMovestylesNames, userMovestylesNameLookup);
         }
 
         public static void InitializeMissingSfxCollections(MoveStyle character, SfxCollection collection)
