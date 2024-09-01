@@ -23,15 +23,12 @@ namespace MoveStyler
 
         public static void LoadSlot(int slot)
         {
-            DebugLog.LogMessage("Load Slot");
             
             if (!Directory.Exists(SAVE_PATH))
             {
                 Directory.CreateDirectory(SAVE_PATH);
                 return;
             }
-
-            DebugLog.LogMessage("Found Dir");
 
             string slotPath = Path.Combine(SAVE_PATH, slot.ToString() + SLOT_FILE_EXTENSION);
             if (File.Exists(slotPath))
@@ -51,14 +48,15 @@ namespace MoveStyler
                     DebugLog.LogWarning($"Failed to read slot data for slot {slot}");
                 }
 
-                DebugLog.LogMessage($"Loaded custom character save slot {slot}");
+                //DebugLog.LogMessage($"Loaded custom character save slot {slot}");
+
             }
 
             CurrentSaveSlotId = slot;
-            DebugLog.LogMessage($"Custom Save slot ID {slot}");
         }
         public static void SaveSlot()
         {
+            
             if (CurrentSaveSlotId == -1)
             {
                 return;
@@ -86,7 +84,7 @@ namespace MoveStyler
             }
         }
 
-        public static bool GetCharacterData(Guid guid, out CharacterProgress progress)
+        public static bool GetCharacterData(Guid guid, out CharacterProgress progress, Characters character = Characters.NONE )
         {
             //Get the data from the lookup, otherwise load it
             if (_progressLookup.TryGetValue(guid, out progress))
@@ -95,7 +93,8 @@ namespace MoveStyler
             }
             else
             {
-                progress = new();
+                //DebugLog.LogMessage("Creating new Custom Char progress");
+                progress = new CustomCharacterProgress();
             }
 
             if (CurrentSaveSlotId == -1)
@@ -112,15 +111,16 @@ namespace MoveStyler
             string characterFilePath = CharacterFilePath(slotPath, guid);
             if (!File.Exists(characterFilePath))
             {
-
-                    progress = new()
-                    {
-                        outfit = 0,
-                        moveStyle = MoveStyle.ON_FOOT,
-                        moveStyleSkin = 0
-                    };
-                    _progressLookup.Add(guid, progress);
-                    return true;
+                //DebugLog.LogMessage("Creating new Custom Char progress with input");
+                progress = new CustomCharacterProgress()
+                {
+                    character = character,
+                    outfit = 0,
+                    moveStyle = MoveStyle.ON_FOOT,
+                    moveStyleSkin = 0
+                };
+                _progressLookup.Add(guid, progress);
+                return true;
             }
 
             try
@@ -173,7 +173,10 @@ namespace MoveStyler
             catch (Exception)
             {
                 DebugLog.LogError($"Could not write character save data for character with GUID \"{guid}\".");
+                return;
             }
+
+            //DebugLog.LogMessage($"Save Char data {progress.character} | SavedMovestyle {progress.moveStyle}");
 
         }
 

@@ -1,2 +1,3 @@
 .vs/
 *.vsidx
+/MoveStyler Plugin/Libraries/Assembly-CSharp_publicized.dll

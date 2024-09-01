@@ -506,7 +506,6 @@ namespace MoveStyler
 
         public static void setPlayerMovementStyle(Player player, MoveStyle moveStyle)
         {
-            player.SetCurrentMoveStyleEquipped(0);
             player.SetCurrentMoveStyleEquipped(moveStyle);
 
             Core instance = Core.Instance;
@@ -514,8 +513,8 @@ namespace MoveStyler
 
             if (CharUtil.GetGuidForCharacters(playerChar, out Guid CharacterGuid))
             {
-                //DebugLog.LogMessage($"Save {playerChar}");
-                if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog))
+                DebugLog.LogMessage($"Save {playerChar}");
+                if (CharacterSaveSlots.GetCharacterData(CharacterGuid, out CharacterProgress Prog , playerChar))
                 {
                     Prog.moveStyle = moveStyle;
                     //DebugLog.LogMessage($" Set Custom Progress: {moveStyle}");

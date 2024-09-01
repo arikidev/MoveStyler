@@ -131,5 +131,6 @@ namespace MoveStyler
 
             return guid != Guid.Empty;
         }
+
     }
 }

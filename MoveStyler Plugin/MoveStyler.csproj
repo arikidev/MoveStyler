@@ -23,7 +23,7 @@
   
   <ItemGroup>
 	<Reference Include="Assembly-CSharp">
-		<HintPath>Libraries/Assembly-CSharp.dll</HintPath>
+	  <HintPath>Libraries\Assembly-CSharp_publicized.dll</HintPath>
 	</Reference>
 	<Reference Include="CommonAPI">
 	  <HintPath>..\..\..\..\..\Downloads\LazyDuchess-CommonAPI\CommonAPI.dll</HintPath>
@@ -33,6 +33,9 @@
 	</Reference>
 	<Reference Include="MoveStylerApi">
 	  <HintPath>Libraries\MoveStylerApi.dll</HintPath>
+	</Reference>
+	<Reference Include="TowMono">
+	  <HintPath>..\..\TowMono\bin\Release\net46\TowMono.dll</HintPath>
 	</Reference>
 	<Reference Include="Unity.TextMeshPro">
 		<HintPath>Libraries/Unity.TextMeshPro.dll</HintPath>
@@ -64,9 +67,4 @@
     </EmbeddedResource>
   </ItemGroup>
   
-  <ItemGroup>
-    <None Update="Libraries\Assembly-CSharp.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

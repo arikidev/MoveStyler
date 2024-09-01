@@ -23,7 +23,7 @@ namespace MoveStyler.Patches
 
             if (!CharUtil.GetGuidForCharacters(__state, out Guid guid)) { return; }
 
-            if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress characterProgress))
+            if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress characterProgress, __state))
             {
                 if (moveStyleDatabase.HasMovestyle(characterProgress.moveStyle))
                 {

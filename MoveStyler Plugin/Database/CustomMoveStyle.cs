@@ -1466,10 +1466,7 @@ namespace MoveStyler.Data
 		//Set Movement Stats for Custom MoveStyles
 		public void setCustomMovementStats(Player player)
 		{
-			MovementStats stats = (MovementStats)player.GetField("stats").GetValue(player);
-			stats = movementStats;
-
-			player.GetField("stats").SetValue(player, stats);
+			player.stats = movementStats;
 		}
 
 		public void initCustomSFX()

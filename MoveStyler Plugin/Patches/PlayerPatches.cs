@@ -136,7 +136,6 @@ namespace MoveStyler.Patches
             Animator anim = charVis.anim;
 
             charVis.anim.SetFloat("forwardSpeed", speed);
-
         }
 
     }
@@ -183,7 +182,7 @@ namespace MoveStyler.Patches
         }
     }
 
-    //A really dump fix for other mod crashes
+    //A really dumb fix for other mod crashes
     [HarmonyPatch(typeof(Reptile.Player), "DoTrick")]
     public class PlayerDoTrick
     {
@@ -242,11 +241,14 @@ namespace MoveStyler.Patches
     */
 
     //To Do switch to a system that request movestyle switching by name
+    /**
     [HarmonyPatch(typeof(Reptile.Player), nameof(Reptile.Player.SetCurrentMoveStyleEquipped))]
     public class PlayerSetMovestyleEquipped
     {
         private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} Player Patches");
 
+        
+        /**
         public static void Postfix(Player __instance, MoveStyle setMoveStyleEquipped)
         {
             bool isAi = (bool) __instance.GetField("isAI").GetValue(__instance);
@@ -255,17 +257,18 @@ namespace MoveStyler.Patches
                 Characters character = (Characters) __instance.GetField("character").GetValue(__instance);
                 if (CharUtil.GetGuidForCharacters(character, out Guid guid))
                 {
-                    if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress))
+                    if (CharacterSaveSlots.GetCharacterData(guid, out CharacterProgress progress, character))
                     {
                         progress.moveStyle = setMoveStyleEquipped;
                         CharacterSaveSlots.SaveCharacterData(guid);
+                        DebugLog.LogMessage("SetCurrentMoveStyleEquippedPatch saving char");
                     }   
                 }
             }
         }
-    }
-    
- 
+    }**/
+
+    /** //Patch for saving
     [HarmonyPatch(typeof(Reptile.Player), "SaveSelectedCharacter")]
     public class PlayerSaveCharacterPatch
     {
@@ -274,45 +277,44 @@ namespace MoveStyler.Patches
         //Prefix save current movestyle custom
         //Override movestyleEquipped for original and crewboom
         [HarmonyPriority(900)]
-        public static bool Prefix(Player __instance, ref Characters selectedCharacter, MoveStyle ___moveStyleEquipped )
+        public static bool Prefix(Player __instance, Characters selectedCharacter, ref MoveStyle ___moveStyleEquipped, out MoveStyle __state )
         {
             DebugLog.LogMessage("PlayerSaveSelectedCharacterPatch");
-            
-            bool runOriginal = true;
 
-            bool isAI = (bool) __instance.GetField("isAI").GetValue(__instance);
-            bool isNew = selectedCharacter > Characters.MAX;
-            bool isCustomMoveStyle = ___moveStyleEquipped > MoveStyle.MAX;
-            if (!isAI)
+            __state = ___moveStyleEquipped;
+
+            if ((bool)__instance.GetField("isAI").GetValue(__instance)) { return true;}
+
+            if (CharUtil.GetGuidForCharacters(selectedCharacter, out Guid guid))
             {
-                CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = Guid.Empty;
-
-                if (isNew)
-                {
-                    if (CharUtil.GetGuidForCharacters(selectedCharacter, out Guid guid))
-                    {
-                        CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = guid;
-                    }
-                    runOriginal = false;
-                }
-                if (isCustomMoveStyle)
-                {
-                    runOriginal = false;
-                }
-
-                CharacterSaveSlots.SaveSlot();
-            }
-            else if (isNew || isCustomMoveStyle)
-            {
-                runOriginal = false;
+                CharacterSaveSlots.CurrentSaveSlot.LastPlayedCharacter = guid;
             }
 
-            return runOriginal;
+            CharacterSaveSlots.SaveSlot();
+
+            //Override Equiptmovestyle 
+
+            ___moveStyleEquipped = MoveStyle.SKATEBOARD;
+
+            return true;
         }
 
-        //Add postfix to re-set the movestyle
 
+        //Add postfix to re-set the movestyle
+        [HarmonyPriority(399)]
+        public static void Postfix(Player __instance, Characters selectedCharacter, ref MoveStyle ___moveStyleEquipped, MoveStyle __state)
+        {
+            DebugLog.LogMessage("PlayerSaveSelectedCharacterPatch Postfix");
+            DebugLog.LogMessage($"base ms - {__instance.moveStyleEquipped}");
+
+            bool isAI = (bool)__instance.GetField("isAI").GetValue(__instance);
+            if (isAI) { return; }
+
+            ___moveStyleEquipped = __state;
+
+        }
     }
+    **/
 
     [HarmonyPatch(typeof(Reptile.Player), "FixedUpdateAbilities")]
     public class PlayerFixedUpdateAbilitiesPatch
@@ -343,18 +345,4 @@ namespace MoveStyler.Patches
         }
     }
 
-            
-    /*
-    [HarmonyPatch(typeof(Reptile.NPC), "ChangeMovestyle")]
-    public class NPCPatch
-    {
-        private static ManualLogSource DebugLog = BepInEx.Logging.Logger.CreateLogSource($"{PluginInfo.PLUGIN_NAME} NPCPatch");
-
-        public static void Prefix(int num)
-        {
-            DebugLog.LogMessage($"NPC Change Movestyle {num}");
-        }
-
-    }
-    */
 }
